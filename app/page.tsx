@@ -4,6 +4,7 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { ProductModal } from "@/components/product-modal"
 import { Cart } from "@/components/cart"
+import { Calculator } from "@/components/calculator"
 import { LoginPage } from "@/components/login-page"
 import { Hotspot } from "@/components/hotspot"
 import { CertifiedSuppliers } from "@/components/certified-suppliers"
@@ -11,12 +12,13 @@ import { ProductGallery } from "@/components/product-gallery"
 import { useAuth } from "@/contexts/auth-context"
 import { useCart } from "@/contexts/cart-context"
 import { roomsData, type FurnitureItem } from "@/lib/furniture-data"
-import { ShoppingCart, LogOut, ArrowDown } from "lucide-react"
+import { ShoppingCart, LogOut, ArrowDown, Calculator as CalculatorIcon } from "lucide-react"
 
 export default function HomePage() {
   const { isAuthenticated, login, logout } = useAuth()
   const [selectedItem, setSelectedItem] = useState<FurnitureItem | null>(null)
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null)
   const { addToCart, getTotalItems } = useCart()
   const feedRef = useRef<HTMLDivElement>(null)
@@ -65,6 +67,14 @@ export default function HomePage() {
                   {getTotalItems()}
                 </span>
               )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCalculatorOpen(true)}
+              className="bg-white text-black text-xs tracking-[0.15em] uppercase flex items-center gap-2 px-3 py-2 rounded"
+            >
+              <CalculatorIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Calculadora</span>
             </button>
             <button
               type="button"
@@ -273,6 +283,9 @@ export default function HomePage() {
 
       {/* Cart Sidebar */}
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Calculator Modal */}
+      <Calculator isOpen={isCalculatorOpen} onClose={() => setIsCalculatorOpen(false)} />
     </div>
   )
 }
