@@ -6,9 +6,9 @@ import { X, Home, Package, Wrench, Search } from "lucide-react"
 import { roomsData, type FurnitureItem } from "@/lib/furniture-data"
 
 const CATEGORIES = [
-  { id: "decoração", name: "Decoração", icon: Home },
-  { id: "materiais", name: "Materiais", icon: Package },
-  { id: "mobiliário", name: "Mobiliário", icon: Wrench }
+  { id: "decoração", name: "Decoração", icon: Home, texture: "/textures/decoracao-texture.jpg" },
+  { id: "materiais", name: "Materiais", icon: Package, texture: "/textures/materiais-texture.jpg" },
+  { id: "mobiliário", name: "Mobiliário", icon: Wrench, texture: "/textures/mobiliario-texture.jpg" }
 ] as const
 
 export function ProductGallery() {
@@ -79,14 +79,29 @@ export function ProductGallery() {
         {/* Category Buttons */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {CATEGORIES.map((category) => (
-            <Button
+            <button
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className="h-24 tracking-[0.2em] uppercase flex flex-col items-center justify-center gap-2"
+              className="relative h-32 overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 group"
             >
-              <category.icon className="w-6 h-6" />
-              {category.name}
-            </Button>
+              {/* Background Texture Image */}
+              <img
+                src={category.texture}
+                alt={category.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              
+              {/* Dark Overlay */}
+              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-colors duration-300" />
+              
+              {/* Content */}
+              <div className="relative z-10 h-full flex flex-col items-center justify-center gap-2 text-white">
+                <category.icon className="w-6 h-6" />
+                <span className="text-sm tracking-[0.2em] uppercase font-medium">
+                  {category.name}
+                </span>
+              </div>
+            </button>
           ))}
         </div>
       </section>
@@ -94,7 +109,7 @@ export function ProductGallery() {
       {/* Category Modal */}
       {selectedCategory && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-background rounded-lg border border-border/40">
+          <div className="w-full max-w-6xl max-h-[90vh] overflow-y-auto bg-background rounded-xl border border-border/40">
             <div className="sticky top-0 bg-background border-b border-border/40 p-6 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold text-foreground uppercase tracking-[0.2em]">
@@ -126,9 +141,9 @@ export function ProductGallery() {
             <div className="p-6">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {searchFilteredItems.map((item) => (
-                  <div key={item.id} className="group cursor-pointer border border-border/20 rounded-lg p-4 hover:border-[#0099CC] transition-all duration-300">
+                  <div key={item.id} className="group cursor-pointer border border-border/20 rounded-xl p-4 hover:border-[#0099CC] hover:shadow-xl hover:shadow-black/20 hover:scale-[1.02] transition-all duration-300 bg-background">
                     {/* Product Image */}
-                    <div className="aspect-square mb-3 overflow-hidden rounded-lg bg-muted">
+                    <div className="aspect-square relative overflow-hidden rounded-xl bg-muted">
                       <img
                         src={item.imagens[0]}
                         alt={item.nome}
@@ -164,7 +179,7 @@ export function ProductGallery() {
       {/* Product Details Modal */}
       {selectedItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-background rounded-lg border border-border/40">
+          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-background rounded-xl border border-border/40">
             <div className="sticky top-0 bg-background border-b border-border/40 p-6 flex items-center justify-between">
               <div>
                 <h3 className="text-xl font-semibold text-foreground uppercase tracking-[0.2em]">

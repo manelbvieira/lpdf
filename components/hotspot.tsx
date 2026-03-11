@@ -82,7 +82,7 @@ export function Hotspot({ item, onHotspotClick }: HotspotProps) {
   return (
     <button
       ref={hotspotRef}
-      className="hotspot"
+      className="hotspot-ring"
       style={{
         left: `${item.posicao.x}%`,
         top: `${item.posicao.y}%`,
@@ -93,13 +93,26 @@ export function Hotspot({ item, onHotspotClick }: HotspotProps) {
       onClick={() => onHotspotClick(item)}
       aria-label={`Ver detalhes de ${item.nome}`}
     >
+      <div className="ring-inner" />
+      
       {isHovered && (
         <div
           ref={tooltipRef}
-          className="absolute px-3 py-2 bg-foreground text-background text-[10px] tracking-wide z-50 pointer-events-none whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis"
+          className="contextual-card"
           style={tooltipStyle}
         >
-          {item.nome}
+          <h4 className="font-medium text-sm text-foreground mb-1 line-clamp-2">
+            {item.nome}
+          </h4>
+          <p className="text-xs text-muted-foreground mb-2">
+            {item.categoria}
+          </p>
+          <p className="text-sm font-semibold text-[#0099CC]">
+            {item.preco.toFixed(2)}€
+          </p>
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Clica para ver detalhes
+          </p>
         </div>
       )}
     </button>

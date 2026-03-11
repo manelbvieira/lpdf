@@ -20,6 +20,8 @@ export default function HomePage() {
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null)
+  const [cartAnimation, setCartAnimation] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const { addToCart, getTotalItems } = useCart()
   const feedRef = useRef<HTMLDivElement>(null)
 
@@ -38,6 +40,18 @@ export default function HomePage() {
   const handleAddToCart = (item: FurnitureItem, quantidade: number) => {
     addToCart(item, quantidade)
     setSelectedItem(null)
+    
+    // Trigger cart animation
+    setCartAnimation(true)
+    setTimeout(() => setCartAnimation(false), 600)
+  }
+
+  const handleRoomChange = (roomId: string) => {
+    setIsTransitioning(true)
+    setTimeout(() => {
+      setSelectedRoom(roomId)
+      setIsTransitioning(false)
+    }, 150)
   }
 
   const scrollToFeed = () => {
@@ -60,10 +74,10 @@ export default function HomePage() {
               onClick={() => setIsCartOpen(true)}
               className="relative bg-white text-black text-xs tracking-[0.15em] uppercase flex items-center gap-2 px-3 py-2 rounded"
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className={`w-4 h-4 transition-all duration-300 ${cartAnimation ? 'scale-125 text-[#0099CC]' : ''}`} />
               <span className="hidden sm:inline">Orçamento</span>
               {getTotalItems() > 0 && (
-                <span className="absolute -top-2 -right-4 bg-[#0099CC] text-white text-[9px] font-semibold rounded-full w-5 h-5 flex items-center justify-center">
+                <span className={`absolute -top-2 -right-4 bg-[#0099CC] text-white text-[9px] font-semibold rounded-full w-5 h-5 flex items-center justify-center transition-all duration-300 ${cartAnimation ? 'scale-125 bg-green-500' : ''}`}>
                   {getTotalItems()}
                 </span>
               )}
@@ -148,7 +162,7 @@ export default function HomePage() {
             {roomsData.map((room) => (
               <button
                 key={room.id}
-                onClick={() => setSelectedRoom(room.id)}
+                onClick={() => handleRoomChange(room.id)}
                 className={`group relative overflow-hidden rounded-lg border transition-all duration-300 ${
                   selectedRoom === room.id
                     ? "border-[#0099CC] shadow-lg shadow-[#0099CC]/20"
@@ -190,7 +204,7 @@ export default function HomePage() {
 
         {/* Selected Room Display */}
         {selectedRoom && (
-          <section className="relative w-full">
+          <section className={`relative w-full transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
             {/* Full-width room image with hotspots */}
             <div className="relative w-full" style={{ minHeight: "100vh" }}>
               {(() => {

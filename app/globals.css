@@ -68,7 +68,7 @@
   --font-titles: var(--font-titles), ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-titles), ui-serif, Georgia, serif;
+  --font-serif: var(--font-serif), ui-serif, Georgia, serif;
   --font-mono: ui-monospace, SFMono-Regular, monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -155,27 +155,65 @@ p, span, div, button, input, textarea, select {
   }
 }
 
-/* Hotspot styles -- white bg, RAL 5012 border */
-.hotspot {
-  @apply absolute w-4 h-4 bg-white/90 rounded-full border cursor-pointer transition-all duration-300 hover:scale-110;
+/* Ken Burns animation for background */
+@keyframes kenBurns {
+  0% {
+    transform: scale(1.0);
+  }
+  100% {
+    transform: scale(1.1);
+  }
+}
+
+.ken-burns {
+  animation: kenBurns 20s ease-in-out infinite alternate;
+}
+
+/* Contextual Hotspot styles -- light rings */
+.hotspot-ring {
+  @apply absolute w-6 h-6 bg-transparent rounded-full cursor-pointer transition-all duration-300;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  animation: ringPulse 2s infinite;
+}
+
+.ring-inner {
+  @apply absolute inset-1 rounded-full;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+@keyframes ringPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.hotspot-ring:hover {
   border-color: #0099cc;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 0 0 rgba(0, 153, 204, 0.6);
+  animation: none;
 }
 
-.hotspot::after {
-  content: "+";
-  @apply absolute inset-0 flex items-center justify-center font-light text-base;
-  color: #0099cc;
+.hotspot-ring:hover .ring-inner {
+  background: rgba(0, 153, 204, 0.9);
+  box-shadow: 0 0 12px rgba(0, 153, 204, 0.8);
 }
 
-.hotspot:hover {
-  background: #0099cc;
-  box-shadow: 0 4px 16px rgba(0, 153, 204, 0.35);
-}
-
-.hotspot:hover::after {
-  content: "+";
-  color: #ffffff;
+/* Contextual card */
+.contextual-card {
+  @apply absolute z-50 pointer-events-none p-4 min-w-[180px] max-w-[220px];
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 .room-container {

@@ -38,7 +38,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
         <img
           src="/space-street.png"
           alt="Doutor Finanças - Loja modelo"
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover ken-burns"
         />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
       </div>
@@ -61,13 +61,13 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
         {/* Main content */}
         <div className="flex-1 flex items-center justify-center px-6">
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-sm bg-white/10 backdrop-blur-[25px] border border-white/20 rounded-xl p-8">
             <div className="mb-12">
               <p className="text-[10px] tracking-widest uppercase text-white mb-4">
                 ACESSO RESTRITO
               </p>
               <div className="relative">
-                <h1 className="text-3xl sm:text-4xl leading-tight tracking-tight text-white">
+                <h1 className="text-3xl sm:text-4xl leading-tight tracking-tight text-white font-serif font-light">
                   Catálogo interativo
                 </h1>
                 <p className="mt-4 text-sm text-white leading-relaxed">
@@ -88,14 +88,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Introduza a password"
-                    className={`h-12 bg-transparent border-border/60 focus:border-[#0099CC] rounded-none text-sm ${error ? "border-destructive" : ""}`}
+                    className={`h-12 bg-transparent border-0 border-b border-gray-300/50 focus:border-[#0099CC] focus:ring-0 rounded-none text-white placeholder:text-white/50 transition-all duration-300 ${error ? "border-red-400" : ""}`}
                     disabled={isLoading}
                     autoFocus
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white transition-colors"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -107,7 +107,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               <Button
                 type="submit"
                 disabled={isLoading || !password}
-                className="w-full h-12 rounded-none bg-[#0099CC] hover:bg-[#007aa3] text-white text-xs tracking-widest uppercase"
+                className="w-full h-12 rounded-none bg-[#0099CC] hover:bg-[#007aa3] hover:scale-[1.03] text-white text-xs tracking-widest uppercase transition-all duration-300"
               >
                 {isLoading ? "A verificar..." : (
                   <span className="flex items-center justify-center gap-2">

@@ -1,0 +1,16 @@
+<!-- Placeholder para textura de tecido macro para Mobiliário -->
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="upholstery" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+      <rect width="30" height="30" fill="#4A5568"/>
+      <circle cx="15" cy="15" r="1" fill="#2D3748" opacity="0.4"/>
+      <line x1="0" y1="15" x2="30" y2="15" stroke="#2D3748" stroke-width="0.3" opacity="0.3"/>
+      <line x1="15" y1="0" x2="15" y2="30" stroke="#2D3748" stroke-width="0.3" opacity="0.3"/>
+    </pattern>
+    <filter id="blur">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="0.4"/>
+    </filter>
+  </defs>
+  <rect width="400" height="300" fill="url(#upholstery)" filter="url(#blur)"/>
+  <rect width="400" height="300" fill="#1A202C" opacity="0.3"/>
+</svg>
