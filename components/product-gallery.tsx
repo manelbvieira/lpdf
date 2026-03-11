@@ -92,7 +92,7 @@ export function ProductGallery() {
               />
               
               {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black/60 group-hover:bg-black/50 transition-colors duration-300" />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
               
               {/* Content */}
               <div className="relative z-10 h-full flex flex-col items-center justify-center gap-2 text-white">

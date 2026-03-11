@@ -12,7 +12,7 @@ import { ProductGallery } from "@/components/product-gallery"
 import { useAuth } from "@/contexts/auth-context"
 import { useCart } from "@/contexts/cart-context"
 import { roomsData, type FurnitureItem } from "@/lib/furniture-data"
-import { ShoppingCart, LogOut, ArrowDown, Calculator as CalculatorIcon } from "lucide-react"
+import { Home, ArrowDown, ShoppingCart, CalculatorIcon, LogOut, X, Sofa, Table } from "lucide-react"
 
 export default function HomePage() {
   const { isAuthenticated, login, logout } = useAuth()
@@ -56,6 +56,20 @@ export default function HomePage() {
 
   const scrollToFeed = () => {
     feedRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const getRoomIcon = (roomName: string) => {
+    const name = roomName.toLowerCase()
+    if (name.includes('lounge') || name === 'lounge') {
+      return Sofa
+    }
+    if (name.includes('reunião') || name.includes('reuniao') || name.includes('meeting') || name === 'sala de reunião') {
+      return Table
+    }
+    if (name.includes('open space') || name === 'open space') {
+      return Home
+    }
+    return Home // fallback
   }
 
   return (
@@ -133,7 +147,7 @@ export default function HomePage() {
       </section>
 
       {/* Projects / Rooms Selection */}
-      <div ref={feedRef}>
+      <div ref={feedRef} className="overflow-visible">
         {/* Section Header */}
         <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20">
           <div className="flex items-end justify-between">
@@ -158,19 +172,19 @@ export default function HomePage() {
 
         {/* Room Selection Buttons */}
         <section className="px-6 lg:px-10 py-12 lg:py-16">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {roomsData.map((room) => (
               <button
                 key={room.id}
                 onClick={() => handleRoomChange(room.id)}
-                className={`group relative overflow-hidden rounded-lg border transition-all duration-300 ${
+                className={`group relative h-64 overflow-hidden rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 ${
                   selectedRoom === room.id
-                    ? "border-[#0099CC] shadow-lg shadow-[#0099CC]/20"
+                    ? "shadow-lg shadow-[#0099CC]/20"
                     : "border-border/40 hover:border-[#0099CC]/50"
                 }`}
               >
                 {/* Room Image */}
-                <div className="aspect-video relative overflow-hidden">
+                <div className="relative h-full overflow-hidden">
                   <Image
                     src={room.imagem || "/placeholder.svg"}
                     alt={room.nome}
@@ -178,25 +192,19 @@ export default function HomePage() {
                     className="object-cover group-hover:scale-105 transition-transform duration-300"
                     quality={85}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
                 </div>
 
-                {/* Room Info */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
-                  <span className="text-[10px] tracking-[0.3em] uppercase text-white/40 block mb-3">
-                    {String(roomsData.indexOf(room) + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl text-white mb-2">
+                {/* Content - Centered like categories */}
+                <div className="absolute inset-0 z-10 h-full flex flex-col items-center justify-center gap-2 text-white">
+                  {(() => {
+                    const IconComponent = getRoomIcon(room.nome)
+                    return <IconComponent className="w-6 h-6" />
+                  })()}
+                  <span className="text-sm tracking-[0.2em] uppercase font-medium">
                     {room.nome}
-                  </h3>
+                  </span>
                 </div>
-
-                {/* Selection Indicator */}
-                {selectedRoom === room.id && (
-                  <div className="absolute top-4 right-4 w-8 h-8 bg-[#0099CC] rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-white rounded-full" />
-                  </div>
-                )}
               </button>
             ))}
           </div>

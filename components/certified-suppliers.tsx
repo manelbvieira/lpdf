@@ -223,7 +223,7 @@ export function CertifiedSuppliers() {
 
   return (
     <>
-      <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20">
+      <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20 overflow-visible" style={{ overflow: 'visible' }}>
         <div className="mb-12">
           <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mb-4">
             PARCEIROS
@@ -237,14 +237,14 @@ export function CertifiedSuppliers() {
         </div>
 
         {/* CARROSSEL HORIZONTAL CONTÍNUO COM SCROLL MANUAL */}
-        <div className="relative overflow-hidden">
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide animate-scroll-x">
+        <div className="relative overflow-visible pb-16" style={{ overflow: 'visible', paddingBottom: '4rem' }}>
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide animate-scroll-x py-8" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
             {duplicatedSuppliers.map((supplier, index) => (
               <Button
                 key={`${supplier.id}-${index}`}
                 variant="outline"
                 onClick={() => setSelectedSupplier(supplier)}
-                className="h-auto w-48 flex-shrink-0 p-6 flex flex-col items-center gap-4 bg-background border-border/40 hover:border-[#0099CC] hover:bg-[#0099CC]/5 transition-all duration-300 group aspect-video"
+                className="h-auto w-48 flex-shrink-0 p-6 flex flex-col items-center gap-4 bg-background border-border/40 hover:border-[#0099CC] hover:bg-[#0099CC]/5 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 transition-all duration-300 group aspect-video"
               >
                 <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center group-hover:bg-[#0099CC]/10 transition-colors">
                   <img src={supplier.logo} alt={supplier.name} className="w-12 h-12 object-contain" />
