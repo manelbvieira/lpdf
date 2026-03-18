@@ -24,24 +24,25 @@ interface Category {
 }
 
 const categories: Category[] = [
-  { id: 'estrutura', name: 'Estrutura', icon: '' },
+  { id: 'estrutura', name: 'Estruturas', icon: '' },
   { id: 'superficies', name: 'Superfícies', icon: '' },
-  { id: 'acabamentos', name: 'Acabamentos', icon: '' }
+  { id: 'publicidade', name: 'Publicidade', icon: '' }
 ]
 
 export function Calculator({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [items, setItems] = useState<CalculatorItem[]>([
-    { id: "demolição", name: "Demolição", unitCost: 200.00, quantity: 0, unit: "un", category: "estrutura" },
+    { id: "demolição", name: "Demolição", unitCost: 100.00, quantity: 0, unit: "un", category: "estrutura" },
+    { id: "eletricidade", name: "Eletricidade", unitCost: 100.00, quantity: 0, unit: "m²", category: "estrutura" },
     { id: "pladur teto", name: "Pladur Teto", unitCost: 28.00, quantity: 0, unit: "m²", category: "estrutura" },
     { id: "pladur parede", name: "Pladur Parede", unitCost: 19.00, quantity: 0, unit: "m²", category: "estrutura" },
     { id: "vidro", name: "Vidro", unitCost: 175.00, quantity: 0, unit: "m²", category: "estrutura" },
-    { id: "pintura", name: "Pintura", unitCost: 13.00, quantity: 0, unit: "m²", category: "acabamentos" },
+    { id: "pintura", name: "Pintura", unitCost: 13.00, quantity: 0, unit: "m²", category: "superficies" },
     { id: "pavimento", name: "Pavimento", unitCost: 27.50, quantity: 0, unit: "m²", category: "superficies" },
-    { id: "vinil montra", name: "Vinil Montra", unitCost: 70.00, quantity: 0, unit: "m²", category: "acabamentos" },
-    { id: "vinil fosco", name: "Vinil Fosco", unitCost: 60.00, quantity: 0, unit: "m²", category: "acabamentos" },
-    { id: "vinil biombo", name: "Vinil Biombo", unitCost: 360.00, quantity: 0, unit: "un", category: "acabamentos" },
-    { id: "vinil horário", name: "Vinil Horário", unitCost: 25.00, quantity: 0, unit: "un", category: "acabamentos" },
-    { id: "reclamo", name: "Reclamo", unitCost: 300.00, quantity: 0, unit: "m/l", category: "acabamentos" }
+    { id: "vinil montra", name: "Vinil Montra", unitCost: 70.00, quantity: 0, unit: "m²", category: "publicidade" },
+    { id: "vinil fosco", name: "Vinil Fosco", unitCost: 60.00, quantity: 0, unit: "m²", category: "publicidade" },
+    { id: "vinil biombo", name: "Vinil Biombo", unitCost: 360.00, quantity: 0, unit: "un", category: "publicidade" },
+    { id: "vinil horário", name: "Vinil Horário", unitCost: 25.00, quantity: 0, unit: "un", category: "publicidade" },
+    { id: "reclamo", name: "Reclamo", unitCost: 300.00, quantity: 0, unit: "m/l", category: "publicidade" }
   ])
 
   const updateQuantity = (id: string, quantity: number) => {
