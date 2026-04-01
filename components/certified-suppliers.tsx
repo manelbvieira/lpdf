@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Globe, X, Phone, Mail } from "lucide-react"
+import { Globe, X, Phone, Mail, ChevronUp } from "lucide-react"
 
 interface Supplier {
   id: string
@@ -223,18 +223,19 @@ export function CertifiedSuppliers() {
 
   return (
     <>
-      <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20 overflow-visible" style={{ overflow: 'visible' }}>
-        <div className="mb-12">
-          <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mb-4">
-            PARCEIROS
-          </p>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl tracking-[0.05em] uppercase text-foreground">
-            FORNECEDORES CERTIFICADOS
-          </h2>
-          <p className="mt-4 text-sm tracking-[0.2em] uppercase text-muted-foreground max-w-2xl leading-relaxed">
-            GARANTEM QUALIDADE, FIABILIDADE E SUSTENTABILIDADE
-          </p>
-        </div>
+      <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20 overflow-visible text-center" style={{ overflow: 'visible' }}>
+        <div className="w-full text-center">
+          <div className="mb-12 text-center">
+            <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mb-4">
+              PARCEIROS
+            </p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl tracking-[0.05em] uppercase text-foreground">
+              FORNECEDORES CERTIFICADOS
+            </h2>
+            <p className="mt-4 text-sm text-muted-foreground max-w-2xl leading-relaxed mx-auto">
+              Garantem qualidade, fiabilidade e sustentabilidade
+            </p>
+          </div>
 
         {/* CARROSSEL HORIZONTAL CONTÍNUO COM SCROLL MANUAL */}
         <div className="relative overflow-visible pb-16" style={{ overflow: 'visible', paddingBottom: '4rem' }}>
@@ -261,7 +262,20 @@ export function CertifiedSuppliers() {
             ))}
           </div>
         </div>
+        </div>
       </section>
+
+      {/* Back to Top CTA */}
+      <div className="mt-12 text-center">
+        <button
+          type="button"
+          onClick={() => window.parent?.postMessage({ action: 'scrollToTop' }, '*')}
+          className="group inline-flex items-center justify-center gap-3 px-6 py-3 bg-[#0099CC] hover:bg-[#007aa3] text-white rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-[#0099CC]/30"
+        >
+          <ChevronUp className="w-5 h-5 text-white group-hover:animate-bounce transition-all duration-300 group-hover:-translate-y-1" />
+          <span className="text-sm font-medium tracking-[0.2em] uppercase">Voltar ao topo</span>
+        </button>
+      </div>
 
       {/* Supplier Modal */}
       {selectedSupplier && (

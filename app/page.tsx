@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import Image from "next/image"
 import { ProductModal } from "@/components/product-modal"
 import { Cart } from "@/components/cart"
@@ -11,7 +11,7 @@ import { ProductGallery } from "@/components/product-gallery"
 import { useAuth } from "@/contexts/auth-context"
 import { useCart } from "@/contexts/cart-context"
 import { roomsData, type FurnitureItem } from "@/lib/furniture-data"
-import { Home, ArrowDown, ShoppingCart, LogOut, X, Sofa, Table } from "lucide-react"
+import { ChevronDown, ShoppingCart, LogOut, X, Sofa, Table } from "lucide-react"
 
 export default function HomePage() {
   const { isAuthenticated, login, logout } = useAuth()
@@ -21,9 +21,43 @@ export default function HomePage() {
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
   const [cartAnimation, setCartAnimation] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [currentSection, setCurrentSection] = useState(0)
   const { addToCart, getTotalItems } = useCart()
   const feedRef = useRef<HTMLDivElement>(null)
   const roomDisplayRef = useRef<HTMLDivElement>(null)
+
+  // Listen for messages from child components
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.action === 'scrollToSuppliers') {
+        scrollToSuppliers()
+      } else if (event.data?.action === 'scrollToTop') {
+        scrollToTop()
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => {
+      window.removeEventListener('message', handleMessage)
+    }
+  }, [])
+
+  // Track current section based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY
+      const windowHeight = window.innerHeight
+      const section = Math.round(scrollPosition / windowHeight)
+      setCurrentSection(section)
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    handleScroll() // Initial call
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   if (!isAuthenticated) {
     return <LoginPage onLogin={login} />
@@ -57,6 +91,23 @@ export default function HomePage() {
     }, 150)
   }
 
+  const scrollToNextSection = () => {
+    // Scroll to the next section (product gallery)
+    const nextSection = document.querySelector('[data-section="product-gallery"]')
+    nextSection?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const scrollToSuppliers = () => {
+    // Scroll to suppliers section
+    const suppliersSection = document.querySelector('[data-section="certified-suppliers"]')
+    suppliersSection?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const scrollToTop = () => {
+    // Scroll to the hero section (top of page)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
   const scrollToFeed = () => {
     feedRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -70,13 +121,13 @@ export default function HomePage() {
       return Table
     }
     if (name.includes('open space') || name === 'open space') {
-      return Home
+      return ChevronDown // Usando ChevronDown como fallback
     }
-    return Home // fallback
+    return ChevronDown // Fallback consistente
   }
 
   return (
-    <div className="min-h-screen bg-background snap-y snap-mandatory overflow-y-scroll scroll-smooth">
+    <div className="min-h-screen bg-background snap-y snap-mandatory overflow-y-scroll scroll-smooth" style={{ scrollSnapType: 'y mandatory' }}>
       {/* Fixed Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 lg:px-10 h-20">
@@ -111,6 +162,35 @@ export default function HomePage() {
         </div>
       </nav>
 
+      {/* Vertical Paging Indicator - Fixed Position */}
+      <div className="fixed left-6 lg:left-10 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-1">
+        {[
+          { id: 0, name: 'Início' },
+          { id: 1, name: 'Espaços' },
+          { id: 2, name: 'Materiais' },
+          { id: 3, name: 'Fornecedores' }
+        ].map((section) => (
+          <div key={section.id} className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentSection === section.id
+                  ? 'bg-[#0099CC] scale-110'
+                  : 'bg-gray-300 hover:bg-gray-400'
+              }`}
+            />
+            <span
+              className={`text-xs tracking-[0.1em] uppercase transition-all duration-300 ${
+                currentSection === section.id
+                  ? 'text-[#0099CC] font-medium'
+                  : 'text-gray-400'
+              }`}
+            >
+              {section.name}
+            </span>
+          </div>
+        ))}
+      </div>
+
       {/* Hero Section - Full Screen with space-street */}
       <section className="relative h-screen w-full overflow-hidden snap-start">
         <Image
@@ -137,8 +217,8 @@ export default function HomePage() {
           className="absolute bottom-8 left-1/2 -translate-x-1/2 group"
         >
           <div className="flex items-center gap-3 px-8 py-4 bg-[#0099CC] hover:bg-[#007aa3] text-white rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-[#0099CC]/30">
-            <span className="text-sm font-medium tracking-[0.2em] uppercase">Explorar</span>
-            <ArrowDown className="w-4 h-4 group-hover:animate-bounce" />
+            <span className="text-sm font-medium tracking-[0.2em] uppercase">Explora</span>
+            <ChevronDown className="w-5 h-5 group-hover:animate-bounce transition-all duration-300 group-hover:translate-y-1" />
           </div>
         </button>
       </section>
@@ -146,70 +226,69 @@ export default function HomePage() {
       {/* Projects / Rooms Selection */}
       <div ref={feedRef} className="overflow-visible">
         {/* Section Header */}
-        <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20 snap-start">
-          <div className="flex items-end justify-between">
-            <div>
+        <section className="pl-40 lg:pl-48 pr-40 lg:pr-48 py-20 lg:py-28 border-b border-border/20 snap-start h-screen">
+          <div className="w-full text-center">
+            {/* Section Info */}
+            <div className="mb-12 text-center">
               <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-4">
                 Materiais e mobiliário
               </p>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl text-foreground uppercase tracking-[0.05em]">
                 ESPAÇOS E AMBIENTES
               </h2>
+              <p className="text-sm text-muted-foreground mt-4">
+                Explora os ambientes de loja e descobre as soluções ideais para o teu espaço
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground hidden sm:block">
-              ({String(roomsData.length).padStart(2, "0")}) Espaços
-            </p>
-          </div>
-          <div className="mb-12">
-            <p className="mt-4 text-sm tracking-[0.2em] uppercase text-muted-foreground max-w-2xl leading-relaxed">
-              SELECIONA O ESPAÇO E CRIA A TUA LOJA
-            </p>
-          </div>
-        </section>
-
-        {/* Room Selection Buttons */}
-        <section className="px-6 lg:px-10 py-12 lg:py-16">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {roomsData.map((room) => (
+            
+            {/* Room Selection Buttons - Now as CTAs */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {roomsData.map((room) => {
+                return (
+                  <button
+                    key={room.id}
+                    onClick={() => handleRoomChange(room.id)}
+                    className="group relative h-64 w-full overflow-hidden rounded-xl bg-background border border-border/20 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10"
+                  >
+                    {/* Background Room Image */}
+                    <Image
+                      src={room.imagem || "/placeholder.svg"}
+                      alt={room.nome}
+                      fill
+                      className="object-cover"
+                      quality={85}
+                    />
+                    
+                    {/* Dark Overlay */}
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
+                    
+                    {/* Content */}
+                    <div className="relative z-10 h-full flex flex-col items-center justify-center p-8 text-white">
+                      <span className="text-sm tracking-[0.2em] uppercase font-medium">
+                        {room.nome}
+                      </span>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            
+            {/* CTA Button */}
+            <div className="mt-16 text-center">
               <button
-                key={room.id}
-                onClick={() => handleRoomChange(room.id)}
-                className={`group relative h-64 overflow-hidden rounded-xl border transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 ${
-                  selectedRoom === room.id
-                    ? "shadow-lg shadow-[#0099CC]/20"
-                    : "border-border/40 hover:border-[#0099CC]/50"
-                }`}
+                type="button"
+                onClick={scrollToNextSection}
+                className="group inline-flex items-center justify-center gap-3 px-6 py-3 bg-[#0099CC] hover:bg-[#007aa3] text-white rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-[#0099CC]/30"
               >
-                {/* Room Image */}
-                <div className="relative h-full overflow-hidden">
-                  <Image
-                    src={room.imagem || "/placeholder.svg"}
-                    alt={room.nome}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    quality={85}
-                  />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
-                </div>
-
-                {/* Content - Centered like categories */}
-                <div className="absolute inset-0 z-10 h-full flex flex-col items-center justify-center gap-2 text-white">
-                  {(() => {
-                    const IconComponent = getRoomIcon(room.nome)
-                    return <IconComponent className="w-6 h-6" />
-                  })()}
-                  <span className="text-sm tracking-[0.2em] uppercase font-medium">
-                    {room.nome}
-                  </span>
-                </div>
+                <ChevronDown className="w-5 h-5 text-white group-hover:animate-bounce transition-all duration-300 group-hover:translate-y-1" />
               </button>
-            ))}
+            </div>
           </div>
         </section>
 
         {/* Room Modal */}
         {selectedRoom && isRoomModalOpen && (
-          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="relative w-full max-w-7xl max-h-[90vh] bg-background rounded-xl overflow-hidden">
               {/* Room Content */}
               <div className="relative h-[80vh]">
@@ -268,7 +347,7 @@ export default function HomePage() {
                           <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 uppercase tracking-[0.05em]">
                             {room.nome}
                           </h3>
-                          <p className="text-sm sm:text-base text-white/80 max-w-2xl leading-relaxed">
+                          <p className="text-xs sm:text-sm text-white/80 max-w-2xl leading-relaxed">
                             {room.descricao}
                           </p>
                         </div>
@@ -282,13 +361,17 @@ export default function HomePage() {
         )}
 
         {/* Product Gallery Section */}
-        <section className="snap-start">
-          <ProductGallery onAddToCart={handleAddToCart} />
+        <section data-section="product-gallery" className="snap-start h-screen flex flex-col justify-center items-center text-center pl-40 lg:pl-48 pr-40 lg:pr-48">
+          <div className="max-w-6xl mx-auto w-full">
+            <ProductGallery onAddToCart={handleAddToCart} />
+          </div>
         </section>
 
         {/* Certified Suppliers Section */}
-        <section className="snap-start">
-          <CertifiedSuppliers />
+        <section data-section="certified-suppliers" className="snap-start h-screen flex flex-col justify-center items-center text-center pl-40 lg:pl-48 pr-40 lg:pr-48">
+          <div className="max-w-6xl mx-auto w-full">
+            <CertifiedSuppliers />
+          </div>
         </section>
 
         {/* Footer */}

@@ -2,10 +2,13 @@
 
 import { useState } from "react"
 import Image from "next/image"
+import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { X, Plus, Minus, ChevronLeft, ChevronRight, Home, Package, Wrench, Search } from "lucide-react"
-import { roomsData, type FurnitureItem } from "@/lib/furniture-data"
+import { ProductModal } from "@/components/product-modal"
+import type { FurnitureItem } from "@/lib/furniture-data"
+import { ChevronRight, Home, Package, Wrench, Search, Minus, Plus, ChevronLeft, ChevronDown } from "lucide-react"
+import { roomsData } from "@/lib/furniture-data"
 
 const CATEGORIES = [
   { id: "decoração", name: "Decoração", icon: Home, texture: "/textures/decoracao-texture.jpg" },
@@ -102,47 +105,61 @@ export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureI
     <>
       {/* Category Filter Bar */}
       <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20">
-        <div className="mb-12">
-          <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mb-4">
-            GALERIA DE PRODUTOS
-          </p>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl tracking-[0.05em] uppercase text-foreground">
-            EXPLORA POR CATEGORIA
-          </h2>
-          <p className="mt-4 text-sm tracking-[0.2em] uppercase text-muted-foreground max-w-2xl leading-relaxed">
-            VISUALIZA OS PRODUTOS SELECIONADOS
-          </p>
-        </div>
+        <div className="w-full text-center">
+          <div className="mb-12 text-center">
+            <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mb-4">
+              GALERIA DE PRODUTOS
+            </p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl tracking-[0.05em] uppercase text-foreground">
+              EXPLORA CADA CATEGORIA
+            </h2>
+            <p className="mt-4 text-sm text-muted-foreground max-w-2xl leading-relaxed mx-auto">
+              Conhece os produtos selecionados e as suas características
+            </p>
+          </div>
 
-        {/* Category Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {CATEGORIES.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className="relative h-32 overflow-hidden rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 group"
-            >
-              {/* Background Texture Image */}
-              <img
-                src={category.texture}
-                alt={category.name}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              
-              {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
-              
-              {/* Content */}
-              <div className="relative z-10 h-full flex flex-col items-center justify-center gap-2 text-white">
-                <category.icon className="w-6 h-6" />
-                <span className="text-sm tracking-[0.2em] uppercase font-medium">
-                  {category.name}
-                </span>
-              </div>
-            </button>
-          ))}
+          {/* Category Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {CATEGORIES.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className="group relative h-64 w-full overflow-hidden rounded-xl bg-background border border-border/20 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10"
+              >
+                {/* Background Texture Image */}
+                <Image
+                  src={category.texture}
+                  alt={category.name}
+                  fill
+                  className="object-cover"
+                  quality={85}
+                />
+                
+                {/* Dark Overlay */}
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
+                
+                {/* Content */}
+                <div className="relative z-10 h-full flex flex-col items-center justify-center p-8 text-white">
+                  <span className="text-sm tracking-[0.2em] uppercase font-medium">
+                    {category.name}
+                  </span>
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </section>
+
+      {/* CTA Button */}
+      <div className="mt-16 text-center">
+        <button
+          type="button"
+          onClick={() => window.parent?.postMessage({ action: 'scrollToSuppliers' }, '*')}
+          className="group inline-flex items-center justify-center gap-3 px-6 py-3 bg-[#0099CC] hover:bg-[#007aa3] text-white rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-[#0099CC]/30"
+        >
+          <ChevronDown className="w-5 h-5 text-white group-hover:animate-bounce transition-all duration-300 group-hover:translate-y-1" />
+        </button>
+      </div>
 
       {/* Category Modal */}
       {selectedCategory && (
