@@ -11,9 +11,9 @@ import { ChevronRight, Home, Package, Wrench, Search, Minus, Plus, ChevronLeft, 
 import { roomsData } from "@/lib/furniture-data"
 
 const CATEGORIES = [
-  { id: "decoração", name: "Decoração", icon: Home, texture: "/textures/decoracao-texture.jpg" },
-  { id: "materiais", name: "Materiais", icon: Package, texture: "/textures/materiais-texture.jpg" },
-  { id: "mobiliário", name: "Mobiliário", icon: Wrench, texture: "/textures/mobiliario-texture.jpg" }
+  { id: "Decoração", name: "Decoração", icon: Home, texture: "/textures/decoracao-texture.jpg" },
+  { id: "Materiais", name: "Materiais", icon: Package, texture: "/textures/materiais-texture.jpg" },
+  { id: "Mobiliário", name: "Mobiliário", icon: Wrench, texture: "/textures/mobiliario-texture.jpg" }
 ] as const
 
 export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureItem, quantidade: number) => void }) {
@@ -31,6 +31,22 @@ export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureI
     )
     return [...mainItems, ...alternativeItems]
   })
+
+  // Calculate unique items count for each category (same logic as modal)
+  const getUniqueItemsCount = (categoryId: string) => {
+    const filteredItems = allItems
+      .filter(item => item.categoria.toLowerCase() === categoryId.toLowerCase())
+      .sort((a, b) => a.nome.localeCompare(b.nome))
+    
+    const uniqueItems = filteredItems.filter((item, index, self) => 
+      filteredItems.findIndex(i => 
+        i.nome.toLowerCase() === item.nome.toLowerCase() && 
+        i.fornecedor?.toLowerCase() === item.fornecedor?.toLowerCase()
+      ) === index
+    )
+    
+    return uniqueItems.length
+  }
 
   // Filter items by category and sort alphabetically
   const filteredItems = selectedCategory 
@@ -105,7 +121,7 @@ export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureI
     <>
       {/* Category Filter Bar */}
       <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20">
-        <div className="w-full text-center">
+        <div className="max-w-6xl mx-auto w-full text-center">
           <div className="mb-12 text-center">
             <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mb-4">
               GALERIA DE PRODUTOS
@@ -136,13 +152,16 @@ export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureI
                 />
                 
                 {/* Dark Overlay */}
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
                 
                 {/* Content */}
                 <div className="relative z-10 h-full flex flex-col items-center justify-center p-8 text-white">
-                  <span className="text-sm tracking-[0.2em] uppercase font-medium">
+                  <span className="text-lg tracking-[0.2em] uppercase font-medium">
                     {category.name}
                   </span>
+                  <p className="text-sm text-white/80 mt-2 text-center">
+                    {getUniqueItemsCount(category.id)} peças
+                  </p>
                 </div>
               </button>
             ))}
@@ -151,7 +170,7 @@ export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureI
       </section>
 
       {/* CTA Button */}
-      <div className="mt-16 text-center">
+      <div className="mt-20 text-center">
         <button
           type="button"
           onClick={() => window.parent?.postMessage({ action: 'scrollToSuppliers' }, '*')}

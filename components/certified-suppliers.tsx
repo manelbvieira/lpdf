@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Globe, X, Phone, Mail, ChevronUp } from "lucide-react"
+import { Globe, X, Phone, Mail, ChevronUp, Sofa, Package, Palette, Megaphone } from "lucide-react"
 
 interface Supplier {
   id: string
@@ -16,6 +16,7 @@ interface Supplier {
   email?: string
   website?: string
   certifications: string[]
+  category: string
 }
 
 const suppliers: Supplier[] = [
@@ -25,7 +26,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-jysk.png",
     description: "MOBILIÁRIO E DECORAÇÃO ESCANDINAVA",
     website: "HTTPS://WWW.JYSK.PT",
-    certifications: ["FSC", "GRS", "OEKO-TEX", "DOWNPASS", "IDFL"]
+    certifications: ["FSC", "GRS", "OEKO-TEX", "DOWNPASS", "IDFL"],
+    category: "mobiliario"
   },
   {
     id: "ikea",
@@ -33,7 +35,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-ikea.png",
     description: "MOBILIÁRIO E DECORAÇÃO SUECA",
     website: "HTTPS://WWW.IKEA.PT",
-    certifications: ["FSC", "GRS", "OEKO-TEX", "ASC", "MSC"]
+    certifications: ["FSC", "GRS", "OEKO-TEX", "ASC", "MSC"],
+    category: "mobiliario"
   },
   {
     id: "leroy-merlin",
@@ -41,7 +44,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-leroy.png",
     description: "MATERIAIS DE CONSTRUÇÃO E BRICOLAGE",
     website: "HTTPS://WWW.LEROYMERLIN.PT",
-    certifications: ["FSC", "PEFC", "BREEAM IN-USE"]
+    certifications: ["FSC", "PEFC", "BREEAM IN-USE"],
+    category: "materiais"
   },
   {
     id: "homa",
@@ -49,7 +53,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-homa.png",
     description: "MOBILIÁRIO CONTEMPORÂNEO COM DESIGN INOVADOR",
     website: "HTTPS://WWW.HOMA.PT",
-    certifications: ["FSC","GRS", "OEKO-TEX"]
+    certifications: ["FSC","GRS", "OEKO-TEX"],
+    category: "mobiliario"
   },
   {
     id: "beliani",
@@ -57,7 +62,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-beliani.png",
     description: "MOBILIÁRIO CONTEMPORÂNEO COM DESIGN INOVADOR",
     website: "HTTPS://WWW.BELIANI.PT",
-    certifications: []
+    certifications: [],
+    category: "mobiliario"
   },
   {
     id: "sklum",
@@ -65,7 +71,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-sklum.png",
     description: "MOBILIÁRIO CONTEMPORÂNEO COM DESIGN INOVADOR",
     website: "HTTPS://WWW.SKLUM.PT",
-    certifications: ["FSC"]
+    certifications: ["FSC"],
+    category: "mobiliario"
   },
   {
     id: "paumarc",
@@ -75,7 +82,8 @@ const suppliers: Supplier[] = [
     phone: "+351 917 871 746",
     email: "comercial@paumarc.pt",
     website: "HTTPS://WWW.PAUMARC.PT",
-    certifications: ["FSC", "PEFC", "DAP"]
+    certifications: ["FSC", "PEFC", "DAP"],
+    category: "materiais"
   },
   {
     id: "ecart",
@@ -83,7 +91,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-ecart.png",
     description: "DESIGN",
     website: "HTTPS://WWW.ECARTDESIGN.PT",
-    certifications: []
+    certifications: [],
+    category: "comunicacao"
   },
   {
     id: "decorestudio",
@@ -92,7 +101,8 @@ const suppliers: Supplier[] = [
     description: "PUBLICIDADE E COMUNICAÇÃO",
     phone: "+351 919 108 122",
     email: "decorestudio.publi@gmail.com",
-    certifications: []
+    certifications: [],
+    category: "comunicacao"
   },
   {
     id: "r2",
@@ -102,7 +112,8 @@ const suppliers: Supplier[] = [
     phone: "+351 964 769 567",
     email: "comercial@reclamo2000.pt",
     website: "HTTPS://WWW.RECLAMO2000.PT",
-    certifications: ["ISO 9001", "IPAC"]
+    certifications: ["ISO 9001", "IPAC"],
+    category: "comunicacao"
   },
   {
     id: "webclinic",
@@ -110,7 +121,8 @@ const suppliers: Supplier[] = [
     logo: "/logo-webclinic.png",
     description: "PUBLICIDADE E COMUNICAÇÃO",
     website: "HTTPS://WWW.WEBCLINIC.PT",
-    certifications: []
+    certifications: [],
+    category: "comunicacao"
   },
   {
     id: "decotirso",
@@ -120,7 +132,8 @@ const suppliers: Supplier[] = [
     phone: "+351 915 214 508",
     email: "comercial@decotirso.com",
     website: "HTTPS://WWW.DECOTIRSO.COM",
-    certifications: ["ISO 9001"]
+    certifications: ["ISO 9001"],
+    category: "mobiliario"
   },
   {
     id: "citymover",
@@ -128,8 +141,30 @@ const suppliers: Supplier[] = [
     logo: "/logo-citymover.png",
     description: "ARMAZENAMENTO E LOGÍSTICA",
     website: "HTTPS://WWW.CITYMOVER.PT",
-    certifications: ["EURO 6"]
+    certifications: ["EURO 6"],
+    category: "materiais"
+  }
+]
+
+const categories = [
+  {
+    id: "mobiliario",
+    name: "Mobiliário",
+    icon: Sofa,
+    description: "Móveis e decoração para todos os ambientes"
   },
+  {
+    id: "materiais",
+    name: "Materiais",
+    icon: Package,
+    description: "Materiais de construção e acabamento"
+  },
+  {
+    id: "comunicacao",
+    name: "Comunicação",
+    icon: Megaphone,
+    description: "Publicidade e comunicação visual"
+  }
 ]
 
 interface SupplierModalProps {
@@ -216,15 +251,22 @@ function SupplierModal({ supplier, isOpen, onClose }: SupplierModalProps) {
 }
 
 export function CertifiedSuppliers() {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedSupplier, setSelectedSupplier] = useState<Supplier | null>(null)
 
-  // Duplicate suppliers for infinite loop
-  const duplicatedSuppliers = [...suppliers, ...suppliers]
+  // Group suppliers by category
+  const suppliersByCategory = suppliers.reduce((acc, supplier) => {
+    if (!acc[supplier.category]) {
+      acc[supplier.category] = []
+    }
+    acc[supplier.category].push(supplier)
+    return acc
+  }, {} as Record<string, Supplier[]>)
 
   return (
     <>
       <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20 overflow-visible text-center" style={{ overflow: 'visible' }}>
-        <div className="w-full text-center">
+        <div className="max-w-6xl mx-auto w-full text-center">
           <div className="mb-12 text-center">
             <p className="text-[10px] tracking-[0.4em] uppercase text-muted-foreground mb-4">
               PARCEIROS
@@ -237,36 +279,101 @@ export function CertifiedSuppliers() {
             </p>
           </div>
 
-        {/* CARROSSEL HORIZONTAL CONTÍNUO COM SCROLL MANUAL */}
-        <div className="relative overflow-visible pb-16" style={{ overflow: 'visible', paddingBottom: '4rem' }}>
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide animate-scroll-x py-8" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
-            {duplicatedSuppliers.map((supplier, index) => (
-              <Button
-                key={`${supplier.id}-${index}`}
-                variant="outline"
-                onClick={() => setSelectedSupplier(supplier)}
-                className="h-auto w-48 flex-shrink-0 p-6 flex flex-col items-center gap-4 bg-background border-border/40 hover:border-[#0099CC] hover:bg-[#0099CC]/5 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/20 transition-all duration-300 group aspect-video"
+        {/* Category Buttons */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {categories.map((category) => {
+            const IconComponent = category.icon
+            return (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className="group relative h-64 w-full overflow-hidden rounded-xl bg-background border border-border/20 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10"
               >
-                <div className="w-16 h-16 bg-muted rounded-lg flex items-center justify-center group-hover:bg-[#0099CC]/10 transition-colors">
-                  <img src={supplier.logo} alt={supplier.name} className="w-12 h-12 object-contain" />
-                </div>
-                <div className="text-center w-full">
-                  <h3 className="text-sm tracking-[0.2em] uppercase text-foreground group-hover:text-[#0099CC] transition-colors">
-                    {supplier.name}
-                  </h3>
-                  <p className="text-xs tracking-[0.15em] uppercase text-muted-foreground mt-1 line-clamp-3 w-full">
-                    {supplier.description}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#0099CC]/20 to-[#007aa3]/40" />
+                <div className="relative z-10 h-full flex flex-col items-center justify-center p-8 text-white">
+                  <IconComponent className="w-12 h-12 mb-4 text-white transition-transform group-hover:scale-110" />
+                  <span className="text-lg tracking-[0.2em] uppercase font-medium">
+                    {category.name}
+                  </span>
+                  <p className="text-sm text-white/80 mt-2 text-center">
+                    {suppliersByCategory[category.id]?.length || 0} fornecedores
                   </p>
                 </div>
-              </Button>
-            ))}
-          </div>
+              </button>
+            )
+          })}
         </div>
         </div>
       </section>
 
+      {/* Category Modal */}
+      {selectedCategory && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-background rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-background border-b border-border/20 p-6 flex items-center justify-between z-10">
+              <div className="text-left">
+                <h3 className="text-xl font-semibold text-foreground uppercase tracking-[0.2em]">
+                  {categories.find(c => c.id === selectedCategory)?.name}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {categories.find(c => c.id === selectedCategory)?.description}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className="p-2 hover:bg-muted rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {suppliersByCategory[selectedCategory]?.map((supplier) => (
+                  <Card key={supplier.id} className="group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg" onClick={() => setSelectedSupplier(supplier)}>
+                    <CardContent className="p-6">
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center group-hover:bg-[#0099CC]/10 transition-colors">
+                          <img src={supplier.logo} alt={supplier.name} className="w-16 h-16 object-contain" />
+                        </div>
+                        <div className="space-y-2">
+                          <h4 className="text-sm font-medium tracking-[0.15em] uppercase text-foreground line-clamp-2 group-hover:text-[#0099CC] transition-colors">
+                            {supplier.name}
+                          </h4>
+                          <p className="text-xs text-muted-foreground line-clamp-3">
+                            {supplier.description}
+                          </p>
+                          {supplier.certifications.length > 0 && (
+                            <div className="flex flex-wrap gap-1 justify-center">
+                              {supplier.certifications.map((cert) => (
+                                <Badge key={cert} variant="secondary" className="text-xs">
+                                  {cert}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Supplier Modal */}
+      {selectedSupplier && (
+        <SupplierModal
+          supplier={selectedSupplier}
+          isOpen={!!selectedSupplier}
+          onClose={() => setSelectedSupplier(null)}
+        />
+      )}
+
       {/* Back to Top CTA */}
-      <div className="mt-16 text-center">
+      <div className="mt-20 text-center">
         <button
           type="button"
           onClick={() => window.parent?.postMessage({ action: 'scrollToTop' }, '*')}

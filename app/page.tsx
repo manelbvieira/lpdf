@@ -26,6 +26,62 @@ export default function HomePage() {
   const feedRef = useRef<HTMLDivElement>(null)
   const roomDisplayRef = useRef<HTMLDivElement>(null)
 
+  const handleHotspotClick = (item: FurnitureItem) => {
+    setSelectedItem(item)
+  }
+
+  const handleCloseModal = () => {
+    setSelectedItem(null)
+  }
+
+  const handleAddToCart = (item: FurnitureItem, quantidade: number) => {
+    addToCart(item, quantidade)
+    setCartAnimation(true)
+    setTimeout(() => setCartAnimation(false), 500)
+  }
+
+  const handleRoomChange = (roomId: string) => {
+    setIsTransitioning(true)
+    
+    // Open modal instead of scrolling
+    setTimeout(() => {
+      setSelectedRoom(roomId)
+      setIsRoomModalOpen(true)
+      setIsTransitioning(false)
+    }, 150)
+  }
+
+  const scrollToFeed = () => {
+    feedRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const scrollToNextSection = () => {
+    const nextSection = document.querySelector('[data-section="product-gallery"]')
+    nextSection?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const scrollToSuppliers = () => {
+    // Scroll to suppliers section
+    const suppliersSection = document.querySelector('[data-section="certified-suppliers"]')
+    suppliersSection?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const scrollToTop = () => {
+    // Scroll to hero section (top of page)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const getRoomIcon = (roomName: string) => {
+    // Return appropriate icon based on room name
+    if (roomName.toLowerCase().includes('lounge')) {
+      return Sofa
+    }
+    if (roomName.toLowerCase().includes('reunião') || roomName.toLowerCase().includes('reuniao')) {
+      return Table
+    }
+    return ChevronDown // Usando ChevronDown como fallback
+  }
+
   // Listen for messages from child components
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -61,69 +117,6 @@ export default function HomePage() {
 
   if (!isAuthenticated) {
     return <LoginPage onLogin={login} />
-  }
-
-  const handleHotspotClick = (item: FurnitureItem) => {
-    setSelectedItem(item)
-  }
-
-  const handleCloseModal = () => {
-    setSelectedItem(null)
-  }
-
-  const handleAddToCart = (item: FurnitureItem, quantidade: number) => {
-    addToCart(item, quantidade)
-    setSelectedItem(null)
-    
-    // Trigger cart animation
-    setCartAnimation(true)
-    setTimeout(() => setCartAnimation(false), 600)
-  }
-
-  const handleRoomChange = (roomId: string) => {
-    setIsTransitioning(true)
-    
-    // Open modal instead of scrolling
-    setTimeout(() => {
-      setSelectedRoom(roomId)
-      setIsRoomModalOpen(true)
-      setIsTransitioning(false)
-    }, 150)
-  }
-
-  const scrollToNextSection = () => {
-    // Scroll to the next section (product gallery)
-    const nextSection = document.querySelector('[data-section="product-gallery"]')
-    nextSection?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const scrollToSuppliers = () => {
-    // Scroll to suppliers section
-    const suppliersSection = document.querySelector('[data-section="certified-suppliers"]')
-    suppliersSection?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const scrollToTop = () => {
-    // Scroll to the hero section (top of page)
-    window.scrollTo({ top: 0, behavior: "smooth" })
-  }
-
-  const scrollToFeed = () => {
-    feedRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const getRoomIcon = (roomName: string) => {
-    const name = roomName.toLowerCase()
-    if (name.includes('lounge') || name === 'lounge') {
-      return Sofa
-    }
-    if (name.includes('reunião') || name.includes('reuniao') || name.includes('meeting') || name === 'sala de reunião') {
-      return Table
-    }
-    if (name.includes('open space') || name === 'open space') {
-      return ChevronDown // Usando ChevronDown como fallback
-    }
-    return ChevronDown // Fallback consistente
   }
 
   return (
@@ -227,7 +220,7 @@ export default function HomePage() {
       <div ref={feedRef} className="overflow-visible">
         {/* Section Header */}
         <section className="pl-40 lg:pl-48 pr-40 lg:pr-48 py-20 lg:py-28 border-b border-border/20 snap-start h-screen">
-          <div className="w-full text-center">
+          <div className="max-w-6xl mx-auto w-full text-center">
             {/* Section Info */}
             <div className="mb-12 text-center">
               <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-4">
@@ -236,7 +229,7 @@ export default function HomePage() {
               <h2 className="text-3xl sm:text-4xl lg:text-5xl text-foreground uppercase tracking-[0.05em]">
                 ESPAÇOS E AMBIENTES
               </h2>
-              <p className="text-sm text-muted-foreground mt-4">
+              <p className="text-sm text-muted-foreground mt-4 max-w-2xl leading-relaxed mx-auto">
                 Explora os ambientes de loja e descobre as soluções ideais para o teu espaço
               </p>
             </div>
@@ -250,7 +243,7 @@ export default function HomePage() {
                     onClick={() => handleRoomChange(room.id)}
                     className="group relative h-64 w-full overflow-hidden rounded-xl bg-background border border-border/20 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10"
                   >
-                    {/* Background Room Image */}
+                    {/* Background Image */}
                     <Image
                       src={room.imagem || "/placeholder.svg"}
                       alt={room.nome}
@@ -260,11 +253,11 @@ export default function HomePage() {
                     />
                     
                     {/* Dark Overlay */}
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/15 transition-colors duration-300" />
+                    <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors duration-300" />
                     
                     {/* Content */}
                     <div className="relative z-10 h-full flex flex-col items-center justify-center p-8 text-white">
-                      <span className="text-sm tracking-[0.2em] uppercase font-medium">
+                      <span className="text-lg tracking-[0.2em] uppercase font-medium">
                         {room.nome}
                       </span>
                     </div>
@@ -274,7 +267,7 @@ export default function HomePage() {
             </div>
             
             {/* CTA Button */}
-            <div className="mt-16 text-center">
+            <div className="mt-20 text-center">
               <button
                 type="button"
                 onClick={scrollToNextSection}
@@ -314,10 +307,10 @@ export default function HomePage() {
                             <button
                               key={room.id}
                               onClick={() => handleRoomChange(room.id)}
-                              className={`text-sm font-medium tracking-[0.1em] uppercase transition-all duration-300 hover:scale-110 ${
+                              className={`text-sm tracking-[0.1em] uppercase transition-all duration-300 hover:scale-110 ${
                                 selectedRoom === room.id
-                                  ? "text-white"
-                                  : "text-white/60 hover:text-white/80"
+                                  ? "text-white font-bold"
+                                  : "text-white/60 hover:text-white/80 font-medium"
                               }`}
                             >
                               {room.nome}
@@ -344,9 +337,6 @@ export default function HomePage() {
                       {/* Room Info Overlay */}
                       <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-10">
                         <div className="max-w-4xl">
-                          <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 uppercase tracking-[0.05em]">
-                            {room.nome}
-                          </h3>
                           <p className="text-xs sm:text-sm text-white/80 max-w-2xl leading-relaxed">
                             {room.descricao}
                           </p>

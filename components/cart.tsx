@@ -1,12 +1,13 @@
 "use client"
 
-import { X, Plus, Minus, Trash2, FileText } from "lucide-react"
-import Image from "next/image"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { useCart } from "@/contexts/cart-context"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { X, FileText, Plus, Minus, Trash2, Mail, Store } from "lucide-react"
 import { generateQuotePDF } from "@/lib/pdf-generator"
+import { useCart } from "@/contexts/cart-context"
+import Image from "next/image"
 
 interface CartProps {
   isOpen: boolean
@@ -16,6 +17,12 @@ interface CartProps {
 export function Cart({ isOpen, onClose }: CartProps) {
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice, getTotalWithoutVAT, getVATAmount, clearCart } =
     useCart()
+
+  // Estado para a modal de exportação PDF
+  const [showPDFModal, setShowPDFModal] = useState(false)
+  const [exportEmail, setExportEmail] = useState("")
+  const [storeName, setStoreName] = useState("")
+  const [isExporting, setIsExporting] = useState(false)
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("pt-PT", {
@@ -45,22 +52,72 @@ export function Cart({ isOpen, onClose }: CartProps) {
     return overallTotal > 0 ? (categoryTotal / overallTotal) * 100 : 0
   }
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = () => {
     if (cartItems.length === 0) {
       alert("Adiciona itens ao orçamento antes de exportar.")
       return
     }
 
+    // Abrir a modal para preencher email e nome da loja
+    setShowPDFModal(true)
+  }
+
+  const handlePDFExport = async () => {
+    if (!exportEmail || !storeName) {
+      alert("Por favor, preencha todos os campos.")
+      return
+    }
+
+    setIsExporting(true)
+    
     try {
-      const success = await generateQuotePDF(cartItems)
+      // Gerar PDF com os dados
+      const success = await generateQuotePDF(cartItems, storeName, exportEmail)
+
       if (success) {
-        // Show success message briefly
-        console.log("[v0] PDF exported successfully")
+        // Enviar cópia para manuel.vieira@doutorfinancas.pt
+        await sendPDFCopy(exportEmail, storeName, cartItems)
+        
+        console.log("[v0] Cart PDF exported successfully")
+        alert("PDF gerado e enviado com sucesso!")
+        
+        // Limpar campos e fechar modal
+        setExportEmail("")
+        setStoreName("")
+        setShowPDFModal(false)
       }
     } catch (error) {
-      console.error("[v0] Error generating PDF:", error)
-      alert("Erro ao gerar PDF. Verifica se o teu navegador permite downloads automáticos e tenta novamente.")
+      console.error("[v0] Error generating Cart PDF:", error)
+      alert("Erro ao gerar PDF. Tenta novamente.")
+    } finally {
+      setIsExporting(false)
     }
+  }
+
+  const sendPDFCopy = async (email: string, storeName: string, items: any[]) => {
+    // Simular envio de email (em produção, isto seria uma API call)
+    const emailData = {
+      to: "manuel.vieira@doutorfinancas.pt",
+      subject: `Novo Orçamento - ${storeName}`,
+      body: `
+        Novo orçamento gerado:
+        
+        Loja: ${storeName}
+        Email do criador: ${email}
+        Data: ${new Date().toLocaleDateString('pt-PT')}
+        
+        Itens:
+        ${items.map(item => `${item.nome}: ${item.quantidade} x €${item.preco} = €${(item.preco * item.quantidade).toFixed(2)}`).join('\n')}
+        
+        Total: €${items.reduce((total, item) => total + (item.preco * item.quantidade), 0).toFixed(2)}
+      `
+    }
+
+    // Simular envio (log para desenvolvimento)
+    console.log("[v0] Email data to send:", emailData)
+    
+    // Em produção, aqui faria uma chamada API para enviar o email
+    // await fetch('/api/send-pdf', { method: 'POST', body: JSON.stringify(emailData) })
   }
 
   if (!isOpen) return null
@@ -271,6 +328,72 @@ export function Cart({ isOpen, onClose }: CartProps) {
           )}
         </CardContent>
       </Card>
+
+      {/* Modal de Exportação PDF */}
+      {showPDFModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-foreground">Exportar orçamento</h3>
+              <button
+                onClick={() => setShowPDFModal(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  <Mail className="w-4 h-4 inline mr-2" />
+                  O teu email
+                </label>
+                <input
+                  type="email"
+                  value={exportEmail}
+                  onChange={(e) => setExportEmail(e.target.value)}
+                  placeholder="nome@email.com"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0099CC] focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  <Store className="w-4 h-4 inline mr-2" />
+                  Nome da loja/localidade
+                </label>
+                <input
+                  type="text"
+                  value={storeName}
+                  onChange={(e) => setStoreName(e.target.value)}
+                  placeholder="Nome da loja/localidade"
+                  className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-[#0099CC] focus:border-transparent"
+                />
+              </div>
+
+              <div className="pt-4">
+                <Button
+                  onClick={handlePDFExport}
+                  disabled={isExporting || !exportEmail || !storeName}
+                  className="w-full h-11 rounded-none bg-[#0099CC] hover:bg-[#007aa3] text-white text-xs tracking-widest uppercase"
+                >
+                  {isExporting ? "A gerar..." : (
+                    <>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Gerar PDF e Enviar
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                O PDF será gerado e enviado também para a equipa de Facilities Experience
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

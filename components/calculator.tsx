@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { X, FileText, Trash2 } from "lucide-react"
+import { X, FileText, Trash2, Mail, Store } from "lucide-react"
 import { generateCalculatorPDF, type CalculatorItem as PDFCalculatorItem } from "@/lib/pdf-generator"
 
 interface CalculatorItem {
@@ -44,6 +44,12 @@ export function Calculator({ isOpen, onClose }: { isOpen: boolean; onClose: () =
     { id: "vinil horário", name: "Vinil Horário", unitCost: 25.00, quantity: 0, unit: "un", category: "publicidade" },
     { id: "reclamo", name: "Reclamo", unitCost: 300.00, quantity: 0, unit: "m/l", category: "publicidade" }
   ])
+
+  // Estado para a modal de exportação PDF
+  const [showPDFModal, setShowPDFModal] = useState(false)
+  const [exportEmail, setExportEmail] = useState("")
+  const [storeName, setStoreName] = useState("")
+  const [isExporting, setIsExporting] = useState(false)
 
   const updateQuantity = (id: string, quantity: number) => {
     setItems(prev => prev.map(item => 
@@ -96,7 +102,26 @@ export function Calculator({ isOpen, onClose }: { isOpen: boolean; onClose: () =
     setItems(prev => prev.map(item => ({ ...item, quantity: 0 })))
   }
 
-  const handleExportPDF = async () => {
+  const handleExportPDF = () => {
+    const pdfItems = items.filter(item => item.quantity > 0)
+    
+    if (pdfItems.length === 0) {
+      alert("Adiciona quantidades aos itens antes de exportar.")
+      return
+    }
+
+    // Abrir a modal para preencher email e nome da loja
+    setShowPDFModal(true)
+  }
+
+  const handlePDFExport = async () => {
+    if (!exportEmail || !storeName) {
+      alert("Por favor, preencha todos os campos.")
+      return
+    }
+
+    setIsExporting(true)
+    
     try {
       const pdfItems: PDFCalculatorItem[] = items.filter(item => item.quantity > 0).map(item => ({
         id: item.id,
@@ -105,20 +130,54 @@ export function Calculator({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         quantity: item.quantity,
         unit: item.unit
       }))
-      
-      if (pdfItems.length === 0) {
-        alert("Adiciona quantidades aos itens antes de exportar.")
-        return
-      }
 
+      // Gerar PDF com os dados adicionais
       const success = await generateCalculatorPDF(pdfItems)
+
       if (success) {
+        // Enviar cópia para manuel.vieira@doutorfinancas.pt
+        await sendPDFCopy(exportEmail, storeName, pdfItems)
+        
         console.log("[v0] Calculator PDF exported successfully")
+        alert("PDF gerado e enviado com sucesso!")
+        
+        // Limpar campos e fechar modal
+        setExportEmail("")
+        setStoreName("")
+        setShowPDFModal(false)
       }
     } catch (error) {
       console.error("[v0] Error generating Calculator PDF:", error)
-      alert("Erro ao gerar PDF. Verifica se o teu navegador permite downloads automáticos e tenta novamente.")
+      alert("Erro ao gerar PDF. Tenta novamente.")
+    } finally {
+      setIsExporting(false)
     }
+  }
+
+  const sendPDFCopy = async (email: string, storeName: string, items: PDFCalculatorItem[]) => {
+    // Simular envio de email (em produção, isto seria uma API call)
+    const emailData = {
+      to: "manuel.vieira@doutorfinancas.pt",
+      subject: `Novo Orçamento - ${storeName}`,
+      body: `
+        Novo orçamento gerado:
+        
+        Loja: ${storeName}
+        Email do criador: ${email}
+        Data: ${new Date().toLocaleDateString('pt-PT')}
+        
+        Itens:
+        ${items.map(item => `${item.name}: ${item.quantity} ${item.unit} x €${item.unitCost} = €${(item.unitCost * item.quantity).toFixed(2)}`).join('\n')}
+        
+        Total: €${items.reduce((total, item) => total + (item.unitCost * item.quantity), 0).toFixed(2)}
+      `
+    }
+
+    // Simular envio (log para desenvolvimento)
+    console.log("[v0] Email data to send:", emailData)
+    
+    // Em produção, aqui faria uma chamada API para enviar o email
+    // await fetch('/api/send-pdf', { method: 'POST', body: JSON.stringify(emailData) })
   }
 
   const getTotalCostPerItem = (item: CalculatorItem) => {
@@ -306,6 +365,72 @@ export function Calculator({ isOpen, onClose }: { isOpen: boolean; onClose: () =
           </p>
         </div>
       </Card>
+
+      {/* Modal de Exportação PDF */}
+      {showPDFModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-semibold text-foreground">Exportar Orçamento</h3>
+              <button
+                onClick={() => setShowPDFModal(false)}
+                className="text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  <Mail className="w-4 h-4 inline mr-2" />
+                  Email do criador
+                </label>
+                <Input
+                  type="email"
+                  value={exportEmail}
+                  onChange={(e) => setExportEmail(e.target.value)}
+                  placeholder="seu@email.com"
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  <Store className="w-4 h-4 inline mr-2" />
+                  Nome da loja
+                </label>
+                <Input
+                  type="text"
+                  value={storeName}
+                  onChange={(e) => setStoreName(e.target.value)}
+                  placeholder="Nome da loja"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="pt-4">
+                <Button
+                  onClick={handlePDFExport}
+                  disabled={isExporting || !exportEmail || !storeName}
+                  className="w-full h-11 rounded-none bg-[#0099CC] hover:bg-[#007aa3] text-white text-xs tracking-widest uppercase"
+                >
+                  {isExporting ? "A gerar..." : (
+                    <>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Gerar PDF e Enviar
+                    </>
+                  )}
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center">
+                O PDF será gerado e enviado para a equipa de Facilities Experience
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

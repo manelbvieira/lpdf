@@ -11,7 +11,7 @@ export interface CalculatorItem {
   unit: string
 }
 
-export async function generateQuotePDF(cartItems: CartItem[]) {
+export async function generateQuotePDF(cartItems: CartItem[], storeName?: string, userEmail?: string) {
   try {
     console.log("[v0] Starting PDF generation...")
 
@@ -19,60 +19,167 @@ export async function generateQuotePDF(cartItems: CartItem[]) {
       throw new Error("jsPDF library not loaded")
     }
 
-    const doc = new jsPDF()
-    const pageWidth = doc.internal.pageSize.width
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    })
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
     const margin = 20
 
-    // Header
-    doc.setFontSize(20)
-    doc.setFont("helvetica", "bold")
-    doc.text("Orçamento - Mobiliário Doutor Finanças", margin, 30)
+    // Header com logo e informações
+    try {
+      console.log("[v0] Loading logo...")
+      // Adicionar logo no canto superior esquerdo
+      const logoResponse = await fetch('/logo-df.png')
+      if (!logoResponse.ok) {
+        throw new Error(`Logo fetch failed: ${logoResponse.status}`)
+      }
+      
+      const logoBlob = await logoResponse.blob()
+      const logoData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            resolve(reader.result)
+          } else {
+            reject(new Error('Failed to convert logo to base64'))
+          }
+        }
+        reader.onerror = () => reject(new Error('FileReader error'))
+        reader.readAsDataURL(logoBlob)
+      })
+      
+      console.log("[v0] Logo loaded successfully, dimensions:", logoBlob.size)
+      const logoWidth = 40
+      const logoHeight = 20
+      doc.addImage(logoData, 'PNG', margin, 15, logoWidth, logoHeight)
+    } catch (error) {
+      console.error("[v0] Logo loading failed:", error)
+      // Fallback: texto do logo com a mesma fonte da página
+      doc.setFont("helvetica", "bold")
+      doc.setFontSize(16)
+      doc.text("DOUTOR FINANÇAS", margin, 25)
+    }
 
-    doc.setFontSize(12)
-    doc.setFont("helvetica", "normal")
-    doc.text(`Data: ${new Date().toLocaleDateString("pt-PT")}`, margin, 45)
-    doc.text(`Orçamento #${Date.now().toString().slice(-6)}`, margin, 55)
+    // Informações ao lado do logo - usando a mesma fonte da página (Inter/Noto Sans)
+    doc.setFont("helvetica", "bold")  // Inter/Noto Sans equivalent
+    doc.setFontSize(14)
+    doc.text("ORÇAMENTO", margin + 50, 25)
 
-    // Line separator
+    if (storeName) {
+      doc.setFont("helvetica", "normal")  // Inter/Noto Sans equivalent
+      doc.setFontSize(12)
+      doc.text(`Loja: ${storeName}`, margin + 50, 35)
+    }
+
+    if (userEmail) {
+      doc.setFont("helvetica", "normal")  // Inter/Noto Sans equivalent
+      doc.setFontSize(10)
+      doc.text(`Email: ${userEmail}`, margin + 50, 48)
+    }
+
+    doc.setFont("helvetica", "normal")  // Inter/Noto Sans equivalent
+    doc.setFontSize(10)
+    const now = new Date()
+    doc.text(`Data: ${now.toLocaleDateString('pt-PT')} ${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, margin + 50, 42)
+
+    // Line separator - ajustado para acomodar email
     doc.setLineWidth(0.5)
-    doc.line(margin, 65, pageWidth - margin, 65)
+    doc.line(margin, 60, pageWidth - margin, 60)
 
-    // Items
-    let yPosition = 80
-    cartItems.forEach((item, index) => {
-      if (yPosition > 250) {
+    // Agrupar itens por categoria
+    const itemsByCategory = cartItems.reduce((acc, item) => {
+      if (!acc[item.categoria]) {
+        acc[item.categoria] = []
+      }
+      acc[item.categoria].push(item)
+      return acc
+    }, {} as Record<string, CartItem[]>)
+
+    let yPosition = 75
+    let grandTotal = 0
+
+    // Iterar por categorias
+    for (const [category, items] of Object.entries(itemsByCategory)) {
+      // Verificar se precisa de nova página
+      if (yPosition > 220) {
         doc.addPage()
         yPosition = 30
       }
 
+      // Header da categoria
+      doc.setFontSize(14)
+      doc.setFont("helvetica", "bold")
+      doc.text(category.toUpperCase(), margin, yPosition)
+      
+      yPosition += 10
+
+      // Linha separadora da categoria
+      doc.setLineWidth(0.3)
+      doc.line(margin, yPosition, pageWidth - margin, yPosition)
+      yPosition += 5
+
+      // Itens da categoria
+      let categoryTotal = 0
+      items.forEach((item) => {
+        if (yPosition > 250) {
+          doc.addPage()
+          yPosition = 30
+        }
+
+        doc.setFontSize(10)
+        doc.setFont("helvetica", "normal")
+        doc.text(item.nome, margin + 5, yPosition)
+        
+        const itemTotal = item.preco * item.quantidade
+        doc.text(`${item.quantidade} x €${item.preco.toFixed(2)}`, margin + 80, yPosition)
+        doc.text(`€${itemTotal.toFixed(2)}`, pageWidth - margin - 30, yPosition)
+        
+        categoryTotal += itemTotal
+        yPosition += 8
+      })
+
+      // Subtotal da categoria
+      yPosition += 5
+      doc.setLineWidth(0.5)
+      doc.line(margin, yPosition, pageWidth - margin, yPosition)
+      yPosition += 5
+
       doc.setFontSize(12)
       doc.setFont("helvetica", "bold")
-      doc.text(item.nome, margin, yPosition)
-
-      doc.setFontSize(10)
-      doc.setFont("helvetica", "normal")
-      doc.text(`${item.quantidade} x ${item.preco.toFixed(2)}€ = ${(item.quantidade * item.preco).toFixed(2)}€`, margin, yPosition + 8)
+      doc.text(`Subtotal ${category}:`, margin, yPosition)
+      doc.text(`€${categoryTotal.toFixed(2)}`, pageWidth - margin - 30, yPosition)
       
-      yPosition += 20
-    })
+      grandTotal += categoryTotal
+      yPosition += 15
 
-    // Totals
-    const subtotal = cartItems.reduce((total, item) => total + (item.preco * item.quantidade), 0)
+      // Espaço entre categorias
+      doc.setLineWidth(0.2)
+      doc.line(margin, yPosition, pageWidth - margin, yPosition)
+      yPosition += 10
+    }
+
+    // Totals finais
+    const subtotal = grandTotal
     const vat = subtotal * 0.23
     const total = subtotal + vat
 
     yPosition += 10
-    doc.setLineWidth(0.5)
+    doc.setLineWidth(0.8)
     doc.line(margin, yPosition, pageWidth - margin, yPosition)
 
     yPosition += 10
     doc.setFontSize(12)
-    doc.text(`Subtotal (sem IVA): ${subtotal.toFixed(2)}€`, margin, yPosition)
-    yPosition += 8
-    doc.text(`IVA (23%): ${vat.toFixed(2)}€`, margin, yPosition)
-    yPosition += 8
     doc.setFont("helvetica", "bold")
-    doc.text(`Total (com IVA): ${total.toFixed(2)}€`, margin, yPosition)
+    doc.text(`Subtotal (sem IVA): €${subtotal.toFixed(2)}`, margin, yPosition)
+    yPosition += 8
+    doc.text(`IVA (23%): €${vat.toFixed(2)}`, margin, yPosition)
+    yPosition += 8
+    doc.setFontSize(14)
+    doc.setFont("helvetica", "bold")
+    doc.text(`TOTAL: €${total.toFixed(2)}`, margin, yPosition)
 
     // Footer
     yPosition += 30
@@ -86,7 +193,9 @@ export async function generateQuotePDF(cartItems: CartItem[]) {
     doc.text("Email: facilities.experience@doutorfinancas.pt", margin, yPosition + 35)
     doc.text("Telefone: +351 123 456 789", margin, yPosition + 45)
 
-    const fileName = `orcamento-${Date.now().toString().slice(-6)}.pdf`
+    const fileName = storeName 
+    ? `orcamento-${storeName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
+    : `orcamento-${Date.now().toString().slice(-6)}.pdf`
     console.log("[v0] Saving PDF as:", fileName)
 
     // Try different methods for better browser compatibility
