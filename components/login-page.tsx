@@ -121,23 +121,6 @@ export function LoginPage({ onLogin }: LoginPageProps) {
             <p className="text-[10px] text-white mt-8 tracking-wide">
               Este conteúdo é privado e requer autenticação
             </p>
-
-            {/* Mobile Disclaimer */}
-            <div className="mt-6 flex flex-col items-center space-y-2 lg:hidden">
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <svg className="w-6 h-6 text-white/80 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <p className="text-xs text-white/90 font-medium">
-                  Rode o telefone na horizontal
-                </p>
-                <p className="text-[9px] text-white/60 mt-1">
-                  para uma melhor experiência
-                </p>
-              </div>
-            </div>
           </div>
         </div>
 

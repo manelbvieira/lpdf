@@ -1,8 +1,10 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { X, Home, Package, Wrench, Search } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { X, Plus, Minus, ChevronLeft, ChevronRight, Home, Package, Wrench, Search } from "lucide-react"
 import { roomsData, type FurnitureItem } from "@/lib/furniture-data"
 
 const CATEGORIES = [
@@ -11,10 +13,12 @@ const CATEGORIES = [
   { id: "mobiliário", name: "Mobiliário", icon: Wrench, texture: "/textures/mobiliario-texture.jpg" }
 ] as const
 
-export function ProductGallery() {
+export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureItem, quantidade: number) => void }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedItem, setSelectedItem] = useState<FurnitureItem | null>(null)
   const [searchTerm, setSearchTerm] = useState<string>("")
+  const [quantidade, setQuantidade] = useState(1)
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // Extract all items from all rooms including alternatives
   const allItems = roomsData.flatMap(room => {
@@ -49,6 +53,40 @@ export function ProductGallery() {
 
   const handleCloseModal = () => {
     setSelectedItem(null)
+    setQuantidade(1)
+    setCurrentImageIndex(0)
+  }
+
+  const handleQuantityChange = (delta: number) => {
+    setQuantidade((prev) => Math.max(1, prev + delta))
+  }
+
+  const handleAddToCart = () => {
+    if (selectedItem) {
+      onAddToCart(selectedItem, quantidade)
+      setSelectedItem(null)
+      setQuantidade(1)
+      setCurrentImageIndex(0)
+    }
+  }
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat("pt-PT", {
+      style: "currency",
+      currency: "EUR",
+    }).format(price)
+  }
+
+  const handlePreviousImage = () => {
+    if (selectedItem) {
+      setCurrentImageIndex((prev) => (prev === 0 ? selectedItem.imagens.length - 1 : prev - 1))
+    }
+  }
+
+  const handleNextImage = () => {
+    if (selectedItem) {
+      setCurrentImageIndex((prev) => (prev === selectedItem.imagens.length - 1 ? 0 : prev + 1))
+    }
   }
 
   const handleCategoryClose = () => {
@@ -178,73 +216,134 @@ export function ProductGallery() {
 
       {/* Product Details Modal */}
       {selectedItem && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-background rounded-xl border border-border/40">
-            <div className="sticky top-0 bg-background border-b border-border/40 p-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-foreground uppercase tracking-[0.2em]">
-                  {selectedItem.nome}
-                </h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {selectedItem.descricao}
-                </p>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardContent className="p-0">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-border/40">
+                <p className="text-[10px] tracking-widest uppercase text-muted-foreground">Detalhes do produto</p>
+                <Button variant="ghost" size="sm" onClick={handleCloseModal} className="bg-transparent text-muted-foreground hover:text-foreground">
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-              <Button variant="ghost" size="sm" onClick={handleCloseModal} className="bg-transparent">
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Images */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-medium text-foreground mb-4">Imagens</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    {selectedItem.imagens.map((image, index) => (
-                      <div key={index} className="aspect-square overflow-hidden rounded-lg border border-border/20">
-                        <img
-                          src={image}
-                          alt={`${selectedItem.nome} - Imagem ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Details */}
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Detalhes</h4>
-                    <div className="space-y-2 text-sm text-muted-foreground">
-                      <p><strong>Categoria:</strong> {selectedItem.categoria}</p>
-                      <p><strong>Fornecedor:</strong> {selectedItem.fornecedor}</p>
-                      <p><strong>Preço:</strong> €{selectedItem.preco.toFixed(2)}</p>
-                      {selectedItem.alternativas && selectedItem.alternativas.length > 0 && (
-                        <p><strong>Alternativa de:</strong> {selectedItem.alternativas[0].id}</p>
+              {/* Content */}
+              <div className="p-6">
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <div className="aspect-square relative overflow-hidden rounded-lg bg-muted">
+                      <Image
+                        src={selectedItem.imagens[currentImageIndex] || "/placeholder.svg"}
+                        alt={`${selectedItem.nome} - Imagem ${currentImageIndex + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                      />
+                      {selectedItem.imagens.length > 1 && (
+                        <>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="absolute left-2 top-1/2 -translate-y-1/2 opacity-80 hover:opacity-100"
+                            onClick={handlePreviousImage}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 opacity-80 hover:opacity-100"
+                            onClick={handleNextImage}
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </>
                       )}
                     </div>
+                    {selectedItem.imagens.length > 1 && (
+                      <div className="flex gap-2 overflow-x-auto">
+                        {selectedItem.imagens.map((imagem, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setCurrentImageIndex(index)}
+                            className={`relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2 transition-all ${
+                              currentImageIndex === index
+                                ? "border-primary"
+                                : "border-transparent opacity-60 hover:opacity-100"
+                            }`}
+                          >
+                            <Image
+                              src={imagem || "/placeholder.svg"}
+                              alt={`Thumbnail ${index + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Descrição</h4>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {selectedItem.descricao}
-                    </p>
-                  </div>
+                  {/* Product Details */}
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
+                        {selectedItem.categoria}
+                      </p>
+                      <h3 className="font-serif text-2xl tracking-tight text-foreground">{selectedItem.nome}</h3>
+                      {selectedItem.fornecedor && (
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {selectedItem.fornecedor}
+                        </p>
+                      )}
+                    </div>
 
-                  <div className="flex gap-3 pt-4">
+                    <p className="text-sm text-muted-foreground leading-relaxed">{selectedItem.descricao}</p>
+
+                    <div className="text-2xl font-light text-foreground">{formatPrice(selectedItem.preco)}</div>
+
+                    {/* Quantity Selector */}
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-foreground">Quantidade</label>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleQuantityChange(-1)}
+                          disabled={quantidade <= 1}
+                        >
+                          <Minus className="w-4 h-4" />
+                        </Button>
+                        <span className="w-12 text-center font-medium">{quantidade}</span>
+                        <Button variant="outline" size="sm" onClick={() => handleQuantityChange(1)}>
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Total Price */}
+                    <div className="p-4 bg-muted rounded-lg">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Subtotal:</span>
+                        <span className="text-lg font-semibold text-foreground">
+                          {formatPrice(selectedItem.preco * quantidade)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Add to Cart Button */}
                     <Button
-                      onClick={handleCloseModal}
-                      className="flex-1 tracking-[0.2em] uppercase"
+                      onClick={handleAddToCart}
+                      className="w-full h-12 rounded-none bg-[#0099CC] hover:bg-[#007aa3] text-white text-xs tracking-widest uppercase"
+                      size="lg"
                     >
-                      FECHAR
+                      Adicionar ao orçamento
                     </Button>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </>

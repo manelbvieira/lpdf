@@ -4,7 +4,6 @@ import { useState, useRef } from "react"
 import Image from "next/image"
 import { ProductModal } from "@/components/product-modal"
 import { Cart } from "@/components/cart"
-import { Calculator } from "@/components/calculator"
 import { LoginPage } from "@/components/login-page"
 import { Hotspot } from "@/components/hotspot"
 import { CertifiedSuppliers } from "@/components/certified-suppliers"
@@ -12,18 +11,19 @@ import { ProductGallery } from "@/components/product-gallery"
 import { useAuth } from "@/contexts/auth-context"
 import { useCart } from "@/contexts/cart-context"
 import { roomsData, type FurnitureItem } from "@/lib/furniture-data"
-import { Home, ArrowDown, ShoppingCart, CalculatorIcon, LogOut, X, Sofa, Table } from "lucide-react"
+import { Home, ArrowDown, ShoppingCart, LogOut, X, Sofa, Table } from "lucide-react"
 
 export default function HomePage() {
   const { isAuthenticated, login, logout } = useAuth()
   const [selectedItem, setSelectedItem] = useState<FurnitureItem | null>(null)
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [isCalculatorOpen, setIsCalculatorOpen] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null)
+  const [isRoomModalOpen, setIsRoomModalOpen] = useState(false)
   const [cartAnimation, setCartAnimation] = useState(false)
   const [isTransitioning, setIsTransitioning] = useState(false)
   const { addToCart, getTotalItems } = useCart()
   const feedRef = useRef<HTMLDivElement>(null)
+  const roomDisplayRef = useRef<HTMLDivElement>(null)
 
   if (!isAuthenticated) {
     return <LoginPage onLogin={login} />
@@ -48,8 +48,11 @@ export default function HomePage() {
 
   const handleRoomChange = (roomId: string) => {
     setIsTransitioning(true)
+    
+    // Open modal instead of scrolling
     setTimeout(() => {
       setSelectedRoom(roomId)
+      setIsRoomModalOpen(true)
       setIsTransitioning(false)
     }, 150)
   }
@@ -73,7 +76,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="bg-background">
+    <div className="min-h-screen bg-background snap-y snap-mandatory overflow-y-scroll scroll-smooth">
       {/* Fixed Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50">
         <div className="flex items-center justify-between px-6 lg:px-10 h-20">
@@ -98,14 +101,6 @@ export default function HomePage() {
             </button>
             <button
               type="button"
-              onClick={() => setIsCalculatorOpen(true)}
-              className="bg-white text-black text-xs tracking-[0.15em] uppercase flex items-center gap-2 px-3 py-2 rounded"
-            >
-              <CalculatorIcon className="w-4 h-4" />
-              <span className="hidden sm:inline">Calculadora</span>
-            </button>
-            <button
-              type="button"
               onClick={logout}
               className="bg-white text-black hover:opacity-90 transition-opacity px-3 py-2 rounded"
               title="Terminar sessao"
@@ -117,7 +112,7 @@ export default function HomePage() {
       </nav>
 
       {/* Hero Section - Full Screen with space-street */}
-      <section className="relative h-screen w-full overflow-hidden">
+      <section className="relative h-screen w-full overflow-hidden snap-start">
         <Image
           src="/space-street.png"
           alt="Doutor Financas - Loja modelo"
@@ -135,21 +130,23 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Call to Action Button */}
         <button
           type="button"
           onClick={scrollToFeed}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 hover:text-white transition-colors flex flex-col items-center gap-2"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 group"
         >
-          <span className="text-[9px] tracking-[0.3em] uppercase">Explorar</span>
-          <ArrowDown className="w-4 h-4 animate-bounce" />
+          <div className="flex items-center gap-3 px-8 py-4 bg-[#0099CC] hover:bg-[#007aa3] text-white rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-[#0099CC]/30">
+            <span className="text-sm font-medium tracking-[0.2em] uppercase">Explorar</span>
+            <ArrowDown className="w-4 h-4 group-hover:animate-bounce" />
+          </div>
         </button>
       </section>
 
       {/* Projects / Rooms Selection */}
       <div ref={feedRef} className="overflow-visible">
         {/* Section Header */}
-        <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20">
+        <section className="px-6 lg:px-10 py-20 lg:py-28 border-b border-border/20 snap-start">
           <div className="flex items-end justify-between">
             <div>
               <p className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground mb-4">
@@ -210,64 +207,89 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Selected Room Display */}
-        {selectedRoom && (
-          <section className={`relative w-full transition-opacity duration-300 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
-            {/* Full-width room image with hotspots */}
-            <div className="relative w-full" style={{ minHeight: "100vh" }}>
-              {(() => {
-                const room = roomsData.find(r => r.id === selectedRoom)
-                if (!room) return null
-                return (
-                  <>
-                    <Image
-                      src={room.imagem || "/placeholder.svg"}
-                      alt={room.nome}
-                      fill
-                      className="object-cover"
-                      quality={85}
-                    />
-                    {/* Dark gradient overlay at bottom for text */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+        {/* Room Modal */}
+        {selectedRoom && isRoomModalOpen && (
+          <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+            <div className="relative w-full max-w-7xl max-h-[90vh] bg-background rounded-xl overflow-hidden">
+              {/* Room Content */}
+              <div className="relative h-[80vh]">
+                {(() => {
+                  const room = roomsData.find(r => r.id === selectedRoom)
+                  if (!room) return null
+                  return (
+                    <>
+                      <Image
+                        src={room.imagem || "/placeholder.svg"}
+                        alt={room.nome}
+                        fill
+                        className="object-cover"
+                        quality={85}
+                      />
+                      {/* Dark gradient overlay at bottom for text */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-                    {/* Hotspots */}
-                    <div className="absolute inset-0">
-                      {room.moveis.map((item) => (
-                        <Hotspot key={item.id} item={item} onHotspotClick={handleHotspotClick} />
-                      ))}
-                    </div>
+                      {/* Room Navigation - Floating over image */}
+                      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-40">
+                        <div className="flex items-center gap-6">
+                          {roomsData.map((room) => (
+                            <button
+                              key={room.id}
+                              onClick={() => handleRoomChange(room.id)}
+                              className={`text-sm font-medium tracking-[0.1em] uppercase transition-all duration-300 hover:scale-110 ${
+                                selectedRoom === room.id
+                                  ? "text-white"
+                                  : "text-white/60 hover:text-white/80"
+                              }`}
+                            >
+                              {room.nome}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-                    {/* Room info overlay at bottom-left */}
-                    <div className="absolute bottom-0 left-0 right-0 px-6 lg:px-10 pb-12 lg:pb-16">
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <span className="text-[10px] tracking-[0.3em] uppercase text-white/40 block mb-3">
-                            {String(roomsData.indexOf(room) + 1).padStart(2, "0")}
-                          </span>
-                          <h3 className="text-3xl sm:text-4xl lg:text-5xl text-white mb-2">
+                      {/* Close Button */}
+                      <button
+                        onClick={() => setIsRoomModalOpen(false)}
+                        className="absolute top-8 right-8 z-40 bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white p-2 rounded-lg transition-colors"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+
+                      {/* Hotspots */}
+                      <div className="absolute inset-0">
+                        {room.moveis.map((item) => (
+                          <Hotspot key={item.id} item={item} onHotspotClick={handleHotspotClick} />
+                        ))}
+                      </div>
+
+                      {/* Room Info Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-10">
+                        <div className="max-w-4xl">
+                          <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 uppercase tracking-[0.05em]">
                             {room.nome}
                           </h3>
-                          <p className="text-xs text-white/50 whitespace-nowrap">
+                          <p className="text-sm sm:text-base text-white/80 max-w-2xl leading-relaxed">
                             {room.descricao}
                           </p>
                         </div>
-                        <p className="text-[9px] tracking-[0.2em] uppercase text-white/30 hidden sm:block">
-                          Clica nos pontos para explorar
-                        </p>
                       </div>
-                    </div>
-                  </>
-                )
-              })()}
+                    </>
+                  )
+                })()}
+              </div>
             </div>
-          </section>
+          </div>
         )}
 
         {/* Product Gallery Section */}
-        <ProductGallery />
+        <section className="snap-start">
+          <ProductGallery onAddToCart={handleAddToCart} />
+        </section>
 
         {/* Certified Suppliers Section */}
-        <CertifiedSuppliers />
+        <section className="snap-start">
+          <CertifiedSuppliers />
+        </section>
 
         {/* Footer */}
         <footer className="border-t border-border/20">
@@ -305,9 +327,6 @@ export default function HomePage() {
 
       {/* Cart Sidebar */}
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-
-      {/* Calculator Modal */}
-      <Calculator isOpen={isCalculatorOpen} onClose={() => setIsCalculatorOpen(false)} />
     </div>
   )
 }
