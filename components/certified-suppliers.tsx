@@ -136,6 +136,17 @@ const suppliers: Supplier[] = [
     category: "mobiliario"
   },
   {
+    id: "virtualfloat",
+    name: "Virtualfloat",
+    logo: "/logo-virtualfloat.png",
+    description: "TRANSFORMAÇÂO E COMÉRCIO DE VIDROS",
+    phone: "+351 910 126570",
+    email: "geral@virtualfloat.pt",
+    website: "HTTPS://WWW.VIRTUALFLOAT.PT",
+    certifications: [],
+    category: "materiais"
+  },
+  {
     id: "citymover",
     name: "CITYMOVER",
     logo: "/logo-citymover.png",

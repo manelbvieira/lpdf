@@ -400,6 +400,16 @@ export const roomsData: Room[] = [
         posicao: { x: 20, y: 45 },
       },
       {
+        id: "vidro",
+        nome: "Vidro",
+        descricao: "Vidro temperado 10mm com acessórios de fixação",
+        categoria: "Decoração",
+        preco: 170.00,
+        imagens: ["/vidro.png"],
+        fornecedor: "Virtualfloat",
+        posicao: { x: 20, y: 15 },
+      },
+      {
         id: "moldura",
         nome: "Moldura - RODALM",
         descricao: "Moldura em MDF branco com a frente em plástico (L50xP3xA70cm)",

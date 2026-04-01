@@ -306,6 +306,10 @@ export function Cart({ isOpen, onClose }: CartProps) {
                   </div>
                 )}
 
+              </div>
+
+              {/* Botões fixos no fundo - FORA do scroll */}
+              <div className="p-4 border-t border-border/40 bg-background space-y-2">
                 <div className="space-y-2">
                   <Button
                     onClick={handleExportPDF}

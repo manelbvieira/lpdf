@@ -28,66 +28,48 @@ export async function generateQuotePDF(cartItems: CartItem[], storeName?: string
     const pageHeight = doc.internal.pageSize.getHeight()
     const margin = 20
 
-    // Header com logo e informações
-    try {
-      console.log("[v0] Loading logo...")
-      // Adicionar logo no canto superior esquerdo
-      const logoResponse = await fetch('/logo-df.png')
-      if (!logoResponse.ok) {
-        throw new Error(`Logo fetch failed: ${logoResponse.status}`)
-      }
-      
-      const logoBlob = await logoResponse.blob()
-      const logoData = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-          if (typeof reader.result === 'string') {
-            resolve(reader.result)
-          } else {
-            reject(new Error('Failed to convert logo to base64'))
-          }
-        }
-        reader.onerror = () => reject(new Error('FileReader error'))
-        reader.readAsDataURL(logoBlob)
-      })
-      
-      console.log("[v0] Logo loaded successfully, dimensions:", logoBlob.size)
-      const logoWidth = 40
-      const logoHeight = 20
-      doc.addImage(logoData, 'PNG', margin, 15, logoWidth, logoHeight)
-    } catch (error) {
-      console.error("[v0] Logo loading failed:", error)
-      // Fallback: texto do logo com a mesma fonte da página
-      doc.setFont("helvetica", "bold")
-      doc.setFontSize(16)
-      doc.text("DOUTOR FINANÇAS", margin, 25)
+    // Função formatPrice com espaçamento melhorado
+    const formatPrice = (price: number) => {
+      return new Intl.NumberFormat("pt-PT", {
+        style: "currency",
+        currency: "EUR",
+        currencyDisplay: "symbol",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(price).replace("€", "€ ")
     }
 
-    // Informações ao lado do logo - usando a mesma fonte da página (Inter/Noto Sans)
-    doc.setFont("helvetica", "bold")  // Inter/Noto Sans equivalent
+    // Header com logo e informações - texto apenas
+    // Texto do logo Doutor Finanças
+    doc.setFont("helvetica", "bold")
+    doc.setFontSize(16)
+    doc.text("DOUTOR FINANÇAS", margin, 25)
+
+    // Informações ao lado do logo
+    doc.setFont("helvetica", "bold")
     doc.setFontSize(14)
     doc.text("ORÇAMENTO", margin + 50, 25)
 
     if (storeName) {
-      doc.setFont("helvetica", "normal")  // Inter/Noto Sans equivalent
+      doc.setFont("helvetica", "normal")
       doc.setFontSize(12)
       doc.text(`Loja: ${storeName}`, margin + 50, 35)
     }
 
     if (userEmail) {
-      doc.setFont("helvetica", "normal")  // Inter/Noto Sans equivalent
+      doc.setFont("helvetica", "normal")
       doc.setFontSize(10)
-      doc.text(`Email: ${userEmail}`, margin + 50, 48)
+      doc.text(`Email: ${userEmail}`, margin + 50, 45) // Reduzido espaçamento
     }
 
-    doc.setFont("helvetica", "normal")  // Inter/Noto Sans equivalent
+    doc.setFont("helvetica", "normal")
     doc.setFontSize(10)
     const now = new Date()
-    doc.text(`Data: ${now.toLocaleDateString('pt-PT')} ${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, margin + 50, 42)
+    doc.text(`Data: ${now.toLocaleDateString('pt-PT')} ${now.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' })}`, margin + 50, 40) // Ajustado posição
 
-    // Line separator - ajustado para acomodar email
+    // Line separator
     doc.setLineWidth(0.5)
-    doc.line(margin, 60, pageWidth - margin, 60)
+    doc.line(margin, 55, pageWidth - margin, 55) // Reduzido posição
 
     // Agrupar itens por categoria
     const itemsByCategory = cartItems.reduce((acc, item) => {
@@ -98,10 +80,10 @@ export async function generateQuotePDF(cartItems: CartItem[], storeName?: string
       return acc
     }, {} as Record<string, CartItem[]>)
 
-    let yPosition = 75
+    let yPosition = 65 // Reduzido posição inicial
     let grandTotal = 0
 
-    // Iterar por categorias
+    // Iterar por categorias - espaçamento reduzido
     for (const [category, items] of Object.entries(itemsByCategory)) {
       // Verificar se precisa de nova página
       if (yPosition > 220) {
@@ -110,88 +92,98 @@ export async function generateQuotePDF(cartItems: CartItem[], storeName?: string
       }
 
       // Header da categoria
-      doc.setFontSize(14)
+      doc.setFontSize(12)
       doc.setFont("helvetica", "bold")
       doc.text(category.toUpperCase(), margin, yPosition)
       
-      yPosition += 10
+      yPosition += 8 // Reduzido espaçamento
 
       // Linha separadora da categoria
       doc.setLineWidth(0.3)
       doc.line(margin, yPosition, pageWidth - margin, yPosition)
-      yPosition += 5
+      yPosition += 3 // Reduzido espaçamento
 
-      // Itens da categoria
+      // Itens da categoria - sem imagens, layout compacto
       let categoryTotal = 0
-      items.forEach((item) => {
+      for (const item of items) {
         if (yPosition > 250) {
           doc.addPage()
           yPosition = 30
         }
 
-        doc.setFontSize(10)
-        doc.setFont("helvetica", "normal")
+        // Nome do item
+        doc.setFontSize(9)
+        doc.setFont("helvetica", "medium")
         doc.text(item.nome, margin + 5, yPosition)
         
+        // Categoria e fornecedor
+        doc.setFontSize(7)
+        doc.setFont("helvetica", "normal")
+        doc.setTextColor(150, 150, 150)
+        doc.text(`${item.categoria} • ${item.fornecedor || 'N/A'}`, margin + 5, yPosition + 4)
+        doc.setTextColor(0, 0, 0)
+        
+        // Preços no lado direito
         const itemTotal = item.preco * item.quantidade
-        doc.text(`${item.quantidade} x €${item.preco.toFixed(2)}`, margin + 80, yPosition)
-        doc.text(`€${itemTotal.toFixed(2)}`, pageWidth - margin - 30, yPosition)
+        doc.setFontSize(8)
+        doc.text(`${item.quantidade} x € ${item.preco.toFixed(2)}`, margin + 120, yPosition)
+        doc.setFontSize(9)
+        doc.setFont("helvetica", "bold")
+        doc.setTextColor(0, 153, 204)
+        doc.text(`€ ${itemTotal.toFixed(2)}`, pageWidth - margin - 30, yPosition)
+        doc.setTextColor(0, 0, 0)
+        doc.setFont("helvetica", "normal")
         
         categoryTotal += itemTotal
-        yPosition += 8
-      })
+        yPosition += 10 // Reduzido espaçamento
+      }
 
       // Subtotal da categoria
-      yPosition += 5
+      yPosition += 3 // Reduzido espaçamento
       doc.setLineWidth(0.5)
       doc.line(margin, yPosition, pageWidth - margin, yPosition)
-      yPosition += 5
+      yPosition += 3 // Reduzido espaçamento
 
       doc.setFontSize(12)
       doc.setFont("helvetica", "bold")
       doc.text(`Subtotal ${category}:`, margin, yPosition)
-      doc.text(`€${categoryTotal.toFixed(2)}`, pageWidth - margin - 30, yPosition)
+      doc.text(`€ ${categoryTotal.toFixed(2)}`, pageWidth - margin - 30, yPosition)
       
       grandTotal += categoryTotal
-      yPosition += 15
+      yPosition += 10 // Reduzido espaçamento
 
       // Espaço entre categorias
       doc.setLineWidth(0.2)
       doc.line(margin, yPosition, pageWidth - margin, yPosition)
-      yPosition += 10
+      yPosition += 5 // Reduzido espaçamento
     }
 
-    // Totals finais
+    // Totals finais - espaçamento reduzido
     const subtotal = grandTotal
     const vat = subtotal * 0.23
     const total = subtotal + vat
 
-    yPosition += 10
+    yPosition += 8 // Reduzido espaçamento
     doc.setLineWidth(0.8)
     doc.line(margin, yPosition, pageWidth - margin, yPosition)
 
-    yPosition += 10
+    yPosition += 5 // Reduzido espaçamento
     doc.setFontSize(12)
     doc.setFont("helvetica", "bold")
-    doc.text(`Subtotal (sem IVA): €${subtotal.toFixed(2)}`, margin, yPosition)
-    yPosition += 8
-    doc.text(`IVA (23%): €${vat.toFixed(2)}`, margin, yPosition)
-    yPosition += 8
+    doc.text(`Subtotal (sem IVA): € ${subtotal.toFixed(2)}`, margin, yPosition)
+    yPosition += 6 // Reduzido espaçamento
+    doc.text(`IVA (23%): € ${vat.toFixed(2)}`, margin, yPosition)
+    yPosition += 6 // Reduzido espaçamento
     doc.setFontSize(14)
     doc.setFont("helvetica", "bold")
-    doc.text(`TOTAL: €${total.toFixed(2)}`, margin, yPosition)
+    doc.text(`TOTAL: € ${total.toFixed(2)}`, margin, yPosition)
 
-    // Footer
+    // Footer simplificado
     yPosition += 30
     doc.setFontSize(8)
     doc.setFont("helvetica", "normal")
     doc.text("Este orçamento é indicativo e os preços podem estar desatualizados. Consulta diretamente os fornecedores ou confere os websites respectivos.", margin, yPosition)
-    doc.text("Para mais informações, contacta a equipa de Facilities Experience.", margin, yPosition + 10)
-
-    // Company info
-    doc.text("Rede Doutor Finanças", margin, yPosition + 25)
-    doc.text("Email: facilities.experience@doutorfinancas.pt", margin, yPosition + 35)
-    doc.text("Telefone: +351 123 456 789", margin, yPosition + 45)
+    doc.text("Para mais informações, contacta a equipa de Facilities Experience.", margin, yPosition + 8) // Reduzido espaçamento
 
     const fileName = storeName 
     ? `orcamento-${storeName.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.pdf`
