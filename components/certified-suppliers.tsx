@@ -266,7 +266,7 @@ export function CertifiedSuppliers() {
       </section>
 
       {/* Back to Top CTA */}
-      <div className="mt-12 text-center">
+      <div className="mt-16 text-center">
         <button
           type="button"
           onClick={() => window.parent?.postMessage({ action: 'scrollToTop' }, '*')}

@@ -368,7 +368,7 @@ export default function HomePage() {
         </section>
 
         {/* Certified Suppliers Section */}
-        <section data-section="certified-suppliers" className="snap-start h-screen flex flex-col justify-center items-center text-center pl-40 lg:pl-48 pr-40 lg:pr-48">
+        <section data-section="certified-suppliers" className="snap-start h-screen flex flex-col justify-between items-center text-center pl-40 lg:pl-48 pr-40 lg:pr-48 py-20 lg:py-28">
           <div className="max-w-6xl mx-auto w-full">
             <CertifiedSuppliers />
           </div>
