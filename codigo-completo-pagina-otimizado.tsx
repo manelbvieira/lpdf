@@ -40,10 +40,6 @@ export default function HomePage() {
     setSelectedItem(item)
   }
 
-  const handleCloseModal = () => {
-    setSelectedItem(null)
-  }
-
   const handleAddToCart = (item: FurnitureItem, quantidade: number) => {
     addToCart(item, quantidade)
     setCartAnimation(true)
@@ -61,11 +57,13 @@ export default function HomePage() {
   }, [cartAnimation])
 
   const handleRoomChange = (roomId: string) => {
-    // Vai direto para 'open' - a transição CSS trata do visual
     setRoomState({ status: 'open', roomId })
   }
 
   const scrollToSection = (index: number) => {
+    // Proteção contra índice fora do array
+    if (index < 0 || index >= SECTION_IDS.length) return
+    
     const element = document.querySelector(`[data-section="${SECTION_IDS[index]}"]`)
     element?.scrollIntoView({ behavior: "smooth" })
   }
@@ -122,7 +120,7 @@ export default function HomePage() {
       document.removeEventListener('keydown', handleKeyDown)
       clearTimeout(timeoutId)
     }
-  }, [roomState.status === 'open'])
+  }, [roomState.status])
 
   // Track current section based on scroll position com throttle
   useEffect(() => {
@@ -184,7 +182,7 @@ export default function HomePage() {
               type="button"
               onClick={logout}
               className="bg-white text-black hover:opacity-90 transition-opacity px-3 py-2 rounded"
-              title="Terminar sessao"
+              title="Terminar sessão"
             >
               <LogOut className="w-4 h-4" />
             </button>
@@ -284,7 +282,6 @@ export default function HomePage() {
                   onClick={() => handleRoomChange(room.id)}
                   className="group relative h-64 w-full overflow-hidden rounded-xl bg-background border border-border/20 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-black/10"
                   aria-label={`Ver detalhes do ambiente ${room.nome}`}
-                  aria-describedby={`room-${room.id}-description`}
                 >
                   {/* Background Image */}
                   <Image
@@ -452,7 +449,7 @@ export default function HomePage() {
       </footer>
 
       {/* Product Modal */}
-      {selectedItem && <ProductModal item={selectedItem} onClose={handleCloseModal} onAddToCart={handleAddToCart} />}
+      {selectedItem && <ProductModal item={selectedItem} onClose={() => setSelectedItem(null)} onAddToCart={handleAddToCart} />}
 
       {/* Cart Sidebar */}
       <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
