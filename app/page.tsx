@@ -115,9 +115,10 @@ export default function HomePage() {
     }
   }, [])
 
-  if (!isAuthenticated) {
-    return <LoginPage onLogin={login} />
-  }
+  // Login desativado - página sempre acessível
+  // if (!isAuthenticated) {
+  //   return <LoginPage onLogin={login} />
+  // }
 
   return (
     <div className="min-h-screen bg-background snap-y snap-mandatory overflow-y-scroll scroll-smooth" style={{ scrollSnapType: 'y mandatory' }}>

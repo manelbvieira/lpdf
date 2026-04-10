@@ -403,7 +403,7 @@ export const roomsData: Room[] = [
         id: "vidro",
         nome: "Vidro",
         descricao: "Vidro temperado 10mm com acessórios de fixação",
-        categoria: "Decoração",
+        categoria: "Materiais",
         preco: 170.00,
         imagens: ["/vidro.png"],
         fornecedor: "Virtualfloat",
