@@ -326,7 +326,21 @@ export function ProductGallery({ onAddToCart }: { onAddToCart: (item: FurnitureI
                       <p className="text-[10px] tracking-widest uppercase text-muted-foreground mb-2">
                         {selectedItem.categoria}
                       </p>
-                      <h3 className="font-serif text-2xl tracking-tight text-foreground">{selectedItem.nome}</h3>
+                      <h3 className="font-serif text-2xl tracking-tight text-foreground">
+                        {selectedItem.url ? (
+                          <a
+                            href={selectedItem.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#0099CC] hover:text-[#007aa3] hover:underline transition-colors duration-200"
+                            title={`Ver ${selectedItem.nome} no site do fornecedor`}
+                          >
+                            {selectedItem.nome}
+                          </a>
+                        ) : (
+                          selectedItem.nome
+                        )}
+                      </h3>
                       {selectedItem.fornecedor && (
                         <p className="text-xs text-muted-foreground mt-2">
                           {selectedItem.fornecedor}

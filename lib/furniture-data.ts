@@ -6,6 +6,7 @@ export interface FurnitureItem {
   preco: number
   imagens: string[]
   fornecedor?: string // Added supplier/manufacturer field
+  url?: string // URL do produto no site do fornecedor
   posicao: {
     x: number // percentage
     y: number // percentage
@@ -36,6 +37,7 @@ export const roomsData: Room[] = [
         preco: 36.58,
         imagens: ["/munkebo-1.png", "/munkebo-2.png"],
         fornecedor: "JYSK",
+        url: "https://jysk.pt/sala-de-estar/mesas-de-centro-e-mesas-de-apoio/conjunto-de-mesas-munkebo-o55-o45-cor-carvalho-natural-2-un",
         posicao: { x: 40, y: 63 },
         alternativas: [
           {
@@ -46,6 +48,7 @@ export const roomsData: Room[] = [
             preco: 73.16,
             imagens: ["/svenstrup-1.png", "/svenstrup-2.png"],
             fornecedor: "JYSK",
+            url: "https://jysk.pt/sala-de-estar/mesas-de-centro-e-mesas-de-apoio/conjunto-de-mesas-svenstrup-o60-50-branco-carvalho-nat-2-un",
             posicao: { x: 0, y: 0 },
           },
           {
@@ -56,6 +59,7 @@ export const roomsData: Room[] = [
             preco: 44.72,
             imagens: ["/mileo-1.png", "/mileo-2.png"],
             fornecedor: "Homa",
+            url: "https://www.homa.pt/conjunto-de-3-mesas-de-apoio-mileo-branco-em-madeira-452624.html",
             posicao: { x: 0, y: 0 },
           },
           {
@@ -66,6 +70,7 @@ export const roomsData: Room[] = [
             preco: 20.33,
             imagens: ["/bakkebjerg-1.png", "/bakkebjerg-2.png"],
             fornecedor: "JYSK",
+            url: "https://jysk.pt/sala-de-estar/mesas-de-centro-e-mesas-de-apoio/mesa-de-apoio-bakkebjerg-o40-branco-natural",
             posicao: { x: 0, y: 0 },
           },
         ],
@@ -78,6 +83,7 @@ export const roomsData: Room[] = [
         preco: 88.82,
         imagens: ["/udjsbjerg-1.png", "/udjsbjerg-2.png", "/udjsbjerg-3.png"],
         fornecedor: "JYSK",
+        url: "https://https://jysk.pt/sala-de-estar/poltronas/cadeirao-udsbjerg-tecido-bege-carvalho",
         posicao: { x: 46, y: 55 },
         alternativas: [
           {
@@ -89,6 +95,7 @@ export const roomsData: Room[] = [
             preco: 88.62,
             imagens: ["/udjsbjerg-4.png", "/udjsbjerg-5.png", "/udjsbjerg-6.png"],
             fornecedor: "JYSK",
+            url: "https://jysk.pt/sala-de-estar/poltronas/cadeirao-udsbjerg-tecido-cinzento-carvalho",
             posicao: { x: 0, y: 0 },
           },
           {
@@ -100,6 +107,7 @@ export const roomsData: Room[] = [
             preco: 72.36,
             imagens: ["/visoca-1.png", "/visoca-2.png"],
             fornecedor: "JYSK",
+            url: "https://www.homa.pt/cadeirao-visoca-em-tecido-cinza-457964.html",
             posicao: { x: 0, y: 0 },
           },
           {
@@ -111,6 +119,7 @@ export const roomsData: Room[] = [
             preco: 80.49,
             imagens: ["/thorup-1.png", "/thorup-2.png", "/thorup-3.png"],
             fornecedor: "JYSK",
+            url: "https://jysk.pt/sala-de-estar/poltronas/cadeirao-thorup-tecido-bege-cor-carvalho",
             posicao: { x: 0, y: 0 },
           },
           {
@@ -139,11 +148,12 @@ export const roomsData: Room[] = [
           {
             id: "pavimento-alt1",
             nome: "Pavimento vinílico",
-            descricao: "Best Floor SPC 111 Carvalho Nice",
+            descricao: "Best Floor SPC 750111 Carvalho Nice",
             categoria: "Materiais",
             preco: 20.50,
             imagens: ["/bestfloor111-1.png", "/bestfloor111-2.png"],
             fornecedor: "Paumarc",
+            url: "https://paumarc.pt/pt/produtos/750111-carvalho-nice-750111",
             posicao: { x: 0, y: 0 },
           },
         ],
@@ -231,6 +241,7 @@ export const roomsData: Room[] = [
         preco: 16.25,
         imagens: ["/ekrar-1.jpg", "/ekrar-2.png"],
         fornecedor: "IKEA",
+        url: "https://www.ikea.com/pt/pt/p/ekrar-bengaleiro-branco-10415594/",
         posicao: { x: 48, y: 40 },
       },
       {
@@ -416,7 +427,7 @@ export const roomsData: Room[] = [
         nome: "Vidro",
         descricao: "Vidro temperado 10mm com acessórios de fixação",
         categoria: "Materiais",
-        preco: (170.00),
+        preco: (0.00),
         imagens: ["/vidro.png"],
         fornecedor: "Virtualfloat",
         posicao: { x: 20, y: 15 },
@@ -767,6 +778,52 @@ export const roomsData: Room[] = [
             preco: 14.63,
             imagens: ["/downlight-1.png", "/downlight-2.png"],
             fornecedor: "Leroy Merlin",
+            posicao: { x: 0, y: 0 },
+          },
+        ],
+      },
+      {
+        id: "zamioculcas",
+        nome: "ZAMIOCULCAS",
+        descricao: "Esta planta é resistente e fácil de cuidar. Ideal para escritórios é sensivel a excesso de rega",
+        categoria: "Decoração",
+        preco: 12.19,
+        imagens: ["/zamioculcas-1.png", "/zamioculcas-2.png"],
+        fornecedor: "IKEA",
+        url: "https://www.ikea.com/pt/pt/p/zamioculcas-planta-zamioculcas-50598681/",
+        posicao: { x: 10, y: 10 },
+        alternativas: [
+          {
+            id: "spathiphyllum-alt1",
+            nome: "SPATHIPHYLLUM",
+            descricao:"Esta planta é resistente e fácil de cuidar. Evitar estar perto de fontes de calor",
+            categoria: "Decoração",
+            preco: 7.31,
+            imagens: ["/spathiphyllum-1.png", "/spathiphyllum-2.png"],
+            fornecedor: "IKEA",
+            url: "https://www.ikea.com/pt/pt/p/spathiphyllum-planta-spathiphyllum-cupido-16804078/",
+            posicao: { x: 0, y: 0 },
+          },
+          {
+            id: "sansevieria-trifasciata-alt2",
+            nome: "SANSEVIERIA TRIFASCIATA",
+            descricao:"Esta planta é resistente e fácil de cuidar. Ideal para escritórios é sensivel a excesso de rega",
+            categoria: "Decoração",
+            preco: 8.12,
+            imagens: ["/sansevieria-trifasciata-1.png", "/sansevieria-trifasciata-2.png"],
+            fornecedor: "IKEA",
+            url: "https://www.ikea.com/pt/pt/p/sansevieria-trifasciata-planta-lingua-da-sogra-00421029/",
+            posicao: { x: 0, y: 0 },
+          },
+          {
+            id: "dypsis-lutescens-alt3",
+            nome: "DYPSIS LUTESCENS",
+            descricao:"Planta ideal para escritórios é sensivel à escassez de rega",
+            categoria: "Decoração",
+            preco: 12.19,
+            imagens: ["/dypsis-lutescens-1.png", "/dypsis-lutescens-2.png"],
+            fornecedor: "IKEA",
+            url: "https://www.ikea.com/pt/pt/p/dypsis-lutescens-planta-areca-50598695/",
             posicao: { x: 0, y: 0 },
           },
         ],
