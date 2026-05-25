@@ -150,7 +150,7 @@ export const roomsData: Room[] = [
             nome: "Pavimento vinílico",
             descricao: "Best Floor SPC 750111 Carvalho Nice",
             categoria: "Materiais",
-            preco: 20.50,
+            preco: 19.20,
             imagens: ["/bestfloor111-1.png", "/bestfloor111-2.png"],
             fornecedor: "Paumarc",
             url: "https://paumarc.pt/pt/produtos/750111-carvalho-nice-750111",
